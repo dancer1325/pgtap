@@ -294,15 +294,16 @@ options, and `pg_prove --man` to see its entire documentation.
     * Reason:🧠protect vs premature failure🧠
     * ❌if you do NOT know BEFOREHAND -> declare that you have NO plan❌
 
-      ```sql
-      SELECT * FROM no_plan();
-      ```
-  * steps
-    * call the `plan()`
-      * if your NUMBER of tests == certain table's NUMBER of rows -> `SELECT plan( COUNT(*) ) FROM <CERTAIN_TABLE>;`
+### | simple test scripts
 
-## What a sweet unit!
+* steps
+  * call the `plan()`
+    * if your NUMBER of tests == certain table's NUMBER of rows -> `SELECT plan( COUNT(*) ) FROM <CERTAIN_TABLE>;`
+    * if you have NO plan -> `SELECT * FROM no_plan();`
 
+### | xUnit-style test functions
+
+TODO: 
 If you're used to xUnit testing frameworks, you can collect all of your tests
 into database functions and run them all at once with `runtests()`
 * The
