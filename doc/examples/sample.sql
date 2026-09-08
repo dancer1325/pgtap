@@ -5,9 +5,20 @@ CREATE EXTENSION IF NOT EXISTS pgtap;
 SELECT plan( 23 );
 
 -- 3. assertions
-SELECT ok( :have = :want, :test_description );
-SELECT is(   :have, :want, :test_description );
-SELECT isnt( :have, :want, :test_description );
+-- All test functions take an optional description argument (highly suggested).
+-- The number is assigned automatically in order.
+--
+--   ok 4                           <- no description
+--   ok 4 - force == mass * accel   <- description as function argument
+
+SELECT ok( :have = :want );
+SELECT ok( :have = :want, 'force == mass * acceleration' );
+
+SELECT is(   :have, :want );
+SELECT is(   :have, :want, 'simple exponential' );
+
+SELECT isnt( :have, :want );
+SELECT isnt( :have, :want, 'basic multi-variable' );
 
 -- 4. diagnostic
 SELECT diag( 'here''s what went wrong' );

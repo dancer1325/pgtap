@@ -303,43 +303,39 @@ options, and `pg_prove --man` to see its entire documentation.
 
 ### | xUnit-style test functions
 
+* `runtests()`  
+  * responsible for
+    * collect ALL your tests | database functions
+    * run ALL your tests functions |
+      * once
+      * individual transactions
+  * supports
+    * setup functions
+    * teardown functions
+
+* 's structure
+
+  ```sql
+  -- 1. write your unit test functions /
+  --      return a set of text results
+  CREATE OR REPLACE FUNCTION setup_insert(
+  ) RETURNS SETOF TEXT AS $$
+  BEGIN
+      RETURN NEXT is( MAX(nick), NULL, 'Should have no users') FROM users;
+      INSERT INTO users (nick) VALUES ('theory');
+  END;
+  $$ LANGUAGE plpgsql;
+  
+  CREATE OR REPLACE FUNCTION test_user(
+  ) RETURNS SETOF TEXT AS $$
+      SELECT is( nick, 'theory', 'Should have nick') FROM users;
+  $$ LANGUAGE sql;
+  
+  -- 2. run your tests
+  SELECT * FROM runtests();   
+  ```
+
 TODO: 
-If you're used to xUnit testing frameworks, you can collect all of your tests
-into database functions and run them all at once with `runtests()`
-* The
-`runtests()` function does all the work of finding and running your test
-functions in individual transactions
-* It even supports setup and teardown
-functions
-* To use it, write your unit test functions so that they return a set
-of text results, and then use the pgTAP assertion functions to return TAP
-values
-* Here's an example, testing a hypothetical `users` table:
-
-```sql
-CREATE OR REPLACE FUNCTION setup_insert(
-) RETURNS SETOF TEXT AS $$
-BEGIN
-    RETURN NEXT is( MAX(nick), NULL, 'Should have no users') FROM users;
-    INSERT INTO users (nick) VALUES ('theory');
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION test_user(
-) RETURNS SETOF TEXT AS $$
-    SELECT is( nick, 'theory', 'Should have nick') FROM users;
-$$ LANGUAGE sql;
-```
-
-See below for details on the pgTAP assertion functions
-* Once you've defined
-your unit testing functions, you can run your tests at any time using the
-`runtests()` function:
-
-```sql
-SELECT * FROM runtests();
-```
-
 Each test function will run within its own transaction, and rolled back when
 the function completes (or after any teardown functions have run)
 * The TAP
@@ -347,33 +343,24 @@ results will be sent to your client.
 
 ## Test Descriptions
 
-By convention, each test is assigned a number in order
-* This is largely done
-automatically for you
-* However, it's often very useful to describe each test.
-Would you rather see this?
+```sql
+testNumber - testDescription
+-- testNumber
+--      assign a number in order / EACH test           
+```
 
-      ok 4
-      not ok 5
-      ok 6
+* test description
+  * == function's input / EACH test
+    * OPTIONAL
+    * 👀PRETTY recommended👀
+  * printed out | EACH test execution
 
-Or this?
-
-      ok 4 - basic multi-variable
-      not ok 5 - simple exponential
-      ok 6 - force == mass * acceleration
-
-The latter gives you some idea of what failed. It also makes it easier to find
-the test in your script, simply search for "simple exponential".
-
-All test functions take a description argument. It's optional, but highly
-suggested that you use it.
-
-### xUnit Function Names ###
+### xUnit Function Names
 
 Sometimes it's useful to extract xUnit test function names from TAP output,
 especially when using xUnit style with Continuous Integration Server like
-Hudson or TeamCity. By default pgTAP displays these names as comments, but
+Hudson or TeamCity
+* By default pgTAP displays these names as comments, but
 you're able to change this behavior by overriding the function `diag_test_name`.
 For example:
 
@@ -394,63 +381,24 @@ instead of
 
 This simplifies parsing test names from TAP comments.
 
-## I'm ok, you're not ok
+## assertions
 
-The basic purpose of pgTAP---and of any TAP-emitting test framework, for that
-matter---is to print out either "ok #" or "not ok #", depending on whether a
-given test succeeded or failed. Everything else is just gravy.
-
-All of the following functions return "ok" or "not ok" depending on whether
-the test succeeded or failed.
+* pgTAP's goal
+  * print out
+    * "ok #" OR
+    * "not ok #"
 
 ### `ok()` ###
 
 ```sql
-SELECT ok( :boolean, :description );
-SELECT ok( :boolean );
+SELECT ok( :booleanExpression, :description );
+SELECT ok( :booleanExpression );
 ```
 
-**Parameters**
-
-`:boolean`
-: A boolean value indicating success or failure.
-
-`:description`
-: A short description of the test.
-
-This function simply evaluates any boolean expression and uses it to determine
-if the test succeeded or failed. A true expression passes, a false one fails.
-Very simple.
-
-For example:
-
-```sql
-SELECT ok( 9 ^ 2 = 81,    'simple exponential' );
-SELECT ok( 9 < 10,        'simple comparison' );
-SELECT ok( 'foo' ~ '^f',  'simple regex' );
-SELECT ok( active = true, name || 'widget active' )
-    FROM widgets;
-```
-
-(Mnemonic:  "This is ok.")
-
-The `:description` is a very short description of the test that will be printed
-out. It makes it very easy to find a test in your script when it fails and
-gives others an idea of your intentions. The description is optional, but we
-*very* strongly encourage its use.
-
-Should an `ok()` fail, it will produce some diagnostics:
-
-    not ok 18 - sufficient mucus
-    #     Failed test 18: "sufficient mucus"
-
-Furthermore, should the boolean test result argument be passed as a `NULL`
-rather than `true` or `false`, `ok()` will assume a test failure and attach an
-additional diagnostic:
-
-    not ok 18 - sufficient mucus
-    #     Failed test 18: "sufficient mucus"
-    #     (test result was NULL)
+* `:description`
+  * OPTIONAL
+    * recommendations
+      * add it
 
 ### `is()` ###
 ### `isnt()` ###
@@ -462,20 +410,22 @@ SELECT isnt( :have, :want, :description );
 SELECT isnt( :have, :want );
 ```
 
-**Parameters**
+* `:have`
+  * == value -- to -- test
 
-`:have`
-: Value to test.
+* `:want`
+  * == value that `:have` is expected to be
+  * ⚠️requirements⚠️
+    * 's type == `:have`'s data type
 
-`:want`
-: Value that `:have` is expected to be. Must be the same data type.
+TODO: 
 
-`:description`
-: A short description of the test.
+Similar to `ok()`, `is()` and `isnt()` compare their two arguments with `IS NOT DISTINCT FROM` (`=`) AND `IS DISTINCT FROM` (`<>`) respectively
 
-Similar to `ok()`, `is()` and `isnt()` compare their two arguments with `IS
-NOT DISTINCT FROM` (`=`) AND `IS DISTINCT FROM` (`<>`) respectively and use
-the result of that to determine if the test succeeded or failed. So these:
+* `ok()` == `is()`
+* `isnt()` == `IS NOT DISTINCT FROM` (`=`) == `IS DISTINCT FROM` (`<>`)
+
+* So these:
 
 ```sql
 -- Is the ultimate answer 42?
@@ -495,13 +445,15 @@ SELECT ok( foo() <> '', 'Got some foo' );
 (Mnemonic: "This is that." "This isn't that.")
 
 *Note:* Thanks to the use of the `IS [ NOT ] DISTINCT FROM` construct, `NULL`s
-are not treated as unknowns by `is()` or `isnt()`. That is, if `:have` and
+are not treated as unknowns by `is()` or `isnt()`
+* That is, if `:have` and
 `:want` are both `NULL`, the test will pass, and if only one of them is
 `NULL`, the test will fail.
 
 So why use these test functions? They produce better diagnostics on failure.
 `ok()` cannot know what you are testing for (beyond the description), but
-`is()` and `isnt()` know what the test was and why it failed. For example this
+`is()` and `isnt()` know what the test was and why it failed
+* For example this
 test:
 
 ```pgsql
@@ -518,7 +470,8 @@ Will produce something like this:
 
 So you can figure out what went wrong without re-running the test.
 
-You are encouraged to use `is()` and `isnt()` over `ok()` where possible. You
+You are encouraged to use `is()` and `isnt()` over `ok()` where possible
+* You
 can even use them to compare records:
 
 ```sql
@@ -695,7 +648,8 @@ SELECT cmp_ok( :have, :op, :want );
 `:description`
 : A short description of the test.
 
-Halfway between `ok()` and `is()` lies `cmp_ok()`. This function allows you to
+Halfway between `ok()` and `is()` lies `cmp_ok()`
+* This function allows you to
 compare two arguments using any binary operator.
 
 ```sql
@@ -719,7 +673,8 @@ and `:want` were:
     #     NULL
 
 Note that if the value returned by the operation is `NULL`, the test will
-be considered to have failed. This may not be what you expect if your test
+be considered to have failed
+* This may not be what you expect if your test
 was, for example:
 
     SELECT cmp_ok( NULL, '=', NULL );
@@ -741,10 +696,13 @@ SELECT fail( );
 `:description`
 : A short description of the test.
 
-Sometimes you just want to say that the tests have passed. Usually the case is
+Sometimes you just want to say that the tests have passed
+* Usually the case is
 you've got some complicated condition that is difficult to wedge into an
-`ok()`. In this case, you can simply use `pass()` (to declare the test ok) or
-`fail()` (for not ok). They are synonyms for `ok(1)` and `ok(0)`.
+`ok()`
+* In this case, you can simply use `pass()` (to declare the test ok) or
+`fail()` (for not ok)
+* They are synonyms for `ok(1)` and `ok(0)`.
 
 Use these functions very, very, very sparingly.
 
