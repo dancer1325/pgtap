@@ -1,5 +1,4 @@
-Synopsis
-========
+# Synopsis
 
 ```sql
 -- 1. setup
@@ -51,8 +50,7 @@ SELECT * FROM finish();
 --      SELECT * FROM finish(true);
 ```
 
-how to install?
-============
+# how to install?
 
 * if you're using PostgreSQL | Docker -> you need to install pgTAP | the Docker container
 
@@ -64,8 +62,7 @@ how to install?
       * download pgTAP | https://pgxn.org/dist/pgtap/
       * unzip the "*.zip"
 
-Potential Issues
-----------------
+## Potential Issues
 
 If you encounter an error such as:
 
@@ -125,8 +122,7 @@ Install the PostgreSQL
 which are required to run the tests. If you used a package management system
 such as RPM to install PostgreSQL, install the `-contrib` package.
 
-Testing pgTAP with pgTAP
-------------------------
+## Testing pgTAP with pgTAP
 
 In addition to the PostgreSQL-standard `installcheck` target, the `test`
 target uses the `pg_prove` Perl program to do its testing, which needs
@@ -176,8 +172,7 @@ export pgtag=12-alpine
 
 Then run the above commands.
 
-how to add pgTAP | a database?
---------------------------
+## how to add pgTAP | a database?
 
 * ⚠️requirements⚠️
   * install pgTAP
@@ -213,8 +208,7 @@ how to add pgTAP | a database?
     DROP EXTENSION IF EXISTS pgtap;
     ```
 
-pgTAP Test Scripts
-==================
+# pgTAP Test Scripts
 
 * ["pgtap.sql"](../sql)
   * == pgTAP's code  
@@ -232,8 +226,7 @@ pgTAP Test Scripts
 * `psql -d try -Xf <pgTAPTestScript>.sql`
   * run your test script
 
-Using `pg_prove`
-----------------
+## Using `pg_prove`
 
 Or save yourself some effort -- and run a batch of tests scripts or all of
 your xUnit test functions at once -- by using `pg_prove`, available in the
@@ -284,8 +277,7 @@ Yep, that's all there is to it
 individual test descriptions, `pg_prove --help` to see other supported
 options, and `pg_prove --man` to see its entire documentation.
 
-how to use pgTAP?
-===========
+# how to use pgTAP?
 
 * ways to use pgTAP
   1) | simple test scripts / 
@@ -294,8 +286,7 @@ how to use pgTAP?
      * you install | your database
      * run ALL DIRECTLY | your chosen PostgreSQL client
 
-define a testing plan
-------------------------------------
+## define a testing plan
 
 * testing plan
   * ⚠️required BEFORE EVERYTHING ELSE⚠️
@@ -310,8 +301,7 @@ define a testing plan
     * call the `plan()`
       * if your NUMBER of tests == certain table's NUMBER of rows -> `SELECT plan( COUNT(*) ) FROM <CERTAIN_TABLE>;`
 
-What a sweet unit!
-------------------
+## What a sweet unit!
 
 If you're used to xUnit testing frameworks, you can collect all of your tests
 into database functions and run them all at once with `runtests()`
@@ -354,8 +344,7 @@ the function completes (or after any teardown functions have run)
 * The TAP
 results will be sent to your client.
 
-Test Descriptions
------------------
+## Test Descriptions
 
 By convention, each test is assigned a number in order
 * This is largely done
@@ -404,8 +393,7 @@ instead of
 
 This simplifies parsing test names from TAP comments.
 
-I'm ok, you're not ok
----------------------
+## I'm ok, you're not ok
 
 The basic purpose of pgTAP---and of any TAP-emitting test framework, for that
 matter---is to print out either "ok #" or "not ok #", depending on whether a
@@ -795,8 +783,7 @@ of the value actually is:
     not ok 12 - the value isa integer[]
     #     the value isn't a "integer[]" it's a "boolean"
 
-Pursuing Your Query
-===================
+# Pursuing Your Query
 
 Sometimes, you've just gotta test a query. I mean the results of a full blown
 query, not just the scalar assertion functions we've seen so far. pgTAP
@@ -873,8 +860,7 @@ queries.
 Keeping these techniques in mind, read on for all of the query-testing
 goodness.
 
-To Error is Human
------------------
+## To Error is Human
 
 Sometimes you just want to know that a particular query will trigger an error.
 Or maybe you want to make sure a query *does not* trigger an error. For such
@@ -1214,8 +1200,7 @@ string. You will want to account for this and pad your estimates accordingly.
 It's best to think of this as a brute force comparison of runtimes, in order
 to ensure that a query is not *really* slow (think seconds).
 
-Can You Relate?
----------------
+## Can You Relate?
 
 So you've got your basic scalar comparison functions, what about relations?
 Maybe you have some pretty hairy `SELECT` statements in views or functions to
@@ -1821,8 +1806,7 @@ Diagnostics on failure are similar to those from `is()`:
     #       have: (1,Jacob)
     #       want: (1,Larry)
 
-The Schema Things
-=================
+# The Schema Things
 
 Need to make sure that your database is designed just the way you think it
 should be? Use these test functions and rest easy.
@@ -1862,8 +1846,7 @@ In general, this should not be an issue, as mixed-case objects are created
 only rarely. So if you just stick to lowercase-only arguments to these
 functions, you should be in good shape.
 
-I Object!
----------
+## I Object!
 
 In a busy development environment, you might have a number of users who make
 changes to the database schema. Sometimes you have to really work to keep
@@ -2883,8 +2866,7 @@ missing extensions, like so:
     #         citext
     #         isn
 
-To Have or Have Not
--------------------
+## To Have or Have Not
 
 Perhaps you're not so concerned with ensuring the [precise correlation of
 database objects](#I+Object! "I Object!"). Perhaps you just need to make sure
@@ -4641,8 +4623,7 @@ SELECT hasnt_extension( :extension );
 This function is the inverse of `has_extension()`. The test passes if the
 specified extension does *not* exist.
 
-Table For One
--------------
+## Table For One
 
 Okay, you're sure that your database has exactly the [right schema](#I+Object!
 "I Object!") and that all of the objects you need [are
@@ -5841,8 +5822,7 @@ type, like so:
     #         have: btree
     #         want: hash
 
-Feeling Funky
--------------
+## Feeling Funky
 
 Perhaps more important than testing the database schema is testing your custom
 functions. Especially if you write functions that provide the interface for
@@ -6640,8 +6620,7 @@ a useful diagnostic:
     #         have: hash_pass
     #         want: hash_password
 
-Database Deets
---------------
+## Database Deets
 
 Tables and functions aren't the only objects in the database, as you well
 know. These assertions close the gap by letting you test the attributes of
@@ -7094,8 +7073,7 @@ If the rule in question does not exist, you'll be told that, too:
 
 But then you run `has_rule()` first, don't you?
 
-Who owns me?
-------------
+## Who owns me?
 
 After testing the availability of several objects, we often need to know who
 owns an object.
@@ -7794,8 +7772,7 @@ user, the diagnostics will look something like:
     #         have: postgres
     #         want: root
 
-Privileged Access
------------------
+## Privileged Access
 
 So we know who owns the objects. But what about other roles? Can they access
 database objects? Let's find out!
@@ -8727,8 +8704,7 @@ missing policy command, like so:
     #         have: INSERT
     #         want: ALL
 
-No Test for the Wicked
-======================
+# No Test for the Wicked
 
 There is more to pgTAP. Oh *so* much more! You can output your own
 [diagnostics](#Diagnostics). You can write [conditional
@@ -8736,8 +8712,7 @@ tests](#Conditional+Tests) based on the output of [utility
 functions](#Utility+Functions). You can [batch up tests in
 functions](#Tap+That+Batch). Read on to learn all about it.
 
-Diagnostics
------------
+## Diagnostics
 
 If you pick the right test function, you'll usually get a good idea of what
 went wrong when it failed. But sometimes it doesn't work out that way. So here
@@ -8780,8 +8755,7 @@ You can pass data of any type to `diag()` and it will all be converted to text
 for the diagnostics. You can also pass any number of arguments (as long as they
 are all the same data type) and they will be concatenated together.
 
-Conditional Tests
------------------
+## Conditional Tests
 
 Sometimes running a test under certain conditions will cause the test script
 or function to die. A certain function or feature isn't implemented (such as
@@ -8941,8 +8915,7 @@ preceding `todo_start()` method call.
 
 Returns true if the test is currently inside a TODO block.
 
-Utility Functions
------------------
+## Utility Functions
 
 Along with the usual array of testing, planning, and diagnostic functions,
 pTAP provides a few extra functions to make the work of testing more pleasant.
@@ -9094,8 +9067,7 @@ renders them internally, e.g., `'interval(0)`, `interval second(0)`, or
 
 ```pgsql
 try=# SELECT format_type_string('timestamp(3)');
-     format_type_string
---------------------------------
+##      format_type_string
  timestamp(3) without time zone
 ```
 
@@ -9130,14 +9102,12 @@ example:
 
 ```sql
 SELECT findfuncs('tests', '^test);
-            findfuncs
------------------------------------
+##             findfuncs
  {tests.test_foo,tests."test bar"}
 (1 row)
 ```
 
-Tap that Batch
---------------
+## Tap that Batch
 
 Sometimes it can be useful to batch a lot of TAP tests into a function. The
 simplest way to do so is to define a function that `RETURNS SETOF TEXT` and
@@ -9288,14 +9258,12 @@ database in largely the same condition as it was in when you started it (the
 one exception I'm aware of being sequences, which are not rolled back to the
 value used at the beginning of a rolled-back transaction).
 
-Secrets of the pgTAP Mavens
-===========================
+# Secrets of the pgTAP Mavens
 
 Over the years, a number of techniques have evolved to make all of our pgTAP
 testing lives easier. Here are some of them.
 
-Relational-style Loops
-----------------------
+## Relational-style Loops
 
 Need to test a bunch of objects and find yourself looking for some kind of
 `for` loop to [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) off
@@ -9323,8 +9291,7 @@ SELECT col_not_null(sch, 'table1', col)
  CROSS JOIN (VALUES('col_pk'), ('col2'), ('col3')) AS ctmp (col);
 ```
 
-Compose Yourself
-================
+# Compose Yourself
 
 So, you've been using pgTAP for a while, and now you want to write your own
 test functions. Go ahead; I don't mind. In fact, I encourage it. How? Why,
@@ -9376,8 +9343,7 @@ $$ LANGUAGE sql;
 But either way, let pgTAP handle recording the test results and formatting the
 output.
 
-Testing Test Functions
-----------------------
+## Testing Test Functions
 
 Now you've written your test function. So how do you test it? Why, with this
 handy-dandy test function!
@@ -9536,52 +9502,44 @@ wants, but it gets the job done. Of course, if your diagnostics use something
 other than indented "have" and "want", such failures will be easier to read.
 But either way, *do* test your diagnostics!
 
-Compatibility vs PostgreSQL
-=============
+# Compatibility vs PostgreSQL
 
 * [detailed](../compat)
 
-PostgreSQL v11+
----------
+## PostgreSQL v11+
 
 * ALL should work
   * Reason:🧠NO changes🧠
 
-PostgreSQL v10-
------------
+## PostgreSQL v10-
 
 * TODO:  The stored procedure-testing funtions are not available, because stored
     procedures were not introduced until 11.
 
-9.6 and Down
-------------
+## 9.6 and Down
 
 * The partition-testing functions are not available, because partitions were
   not introduced until 10.
 
-9.4 and Down
-------------
+## 9.4 and Down
 
 * lives_ok() and throws_ok() will not trap ASSERT_FAILURE, since asserts do not
   exist prior to 9.5.
 
-9.2 and Down
-------------
+## 9.2 and Down
 
 * Lacks full automated testing. Recommend using 9.4 or higher.
 * Diagnostic output from `lives_ok()` and xUnit function exceptions will not
   include schema, table, column, data type, or constraint information, since
   such diagnostics were not introduced until 9.3.
 
-9.1 and Down
-------------
+## 9.1 and Down
 
 * Lacks full automated testing. Recommend using 9.4 or higher.
 * Diagnostic output from `lives_ok()` and xUnit function exceptions will not
   error context or details, since such diagnostics were not introduced until
   9.2.
 
-9.0 and Down
-------------
+## 9.0 and Down
 No longer supported.
 
