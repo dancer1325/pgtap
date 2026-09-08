@@ -1,31 +1,23 @@
-pgTAP 1.3.5
-===========
-
-pgTAP is a unit testing framework for PostgreSQL written in PL/pgSQL and
-PL/SQL. It includes a comprehensive collection of
-[TAP](https://testanything.org)-emitting assertion functions, as well as the
-ability to integrate with other TAP-emitting test frameworks. It can also be
-used in the xUnit testing style.
-
 Synopsis
 ========
 
-``` sql
+```sql
+-- 1. setup
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
+-- 2. declare the NUMBER of tests / you are going to execute
 SELECT plan( 23 );
--- or SELECT * from no_plan();
+-- OR SELECT * from no_plan();
 
--- Various ways to say "ok"
+-- 3. assertions
 SELECT ok( :have = :want, :test_description );
-
 SELECT is(   :have, :want, :test_description );
 SELECT isnt( :have, :want, :test_description );
 
--- Rather than \echo # here's what went wrong
+-- 4. diagnostic
 SELECT diag( 'here''s what went wrong' );
 
--- Compare values with LIKE or regular expressions.
+-- 5. compare with patrons
 SELECT alike(   :have, :like_expression, :test_description );
 SELECT unalike( :have, :like_expression, :test_description );
 
@@ -34,7 +26,7 @@ SELECT doesnt_match( :have, :regex, :test_description );
 
 SELECT cmp_ok(:have, '=', :want, :test_description );
 
--- Skip tests based on runtime conditions.
+-- 6. Skip tests based on runtime conditions.
 SELECT CASE WHEN :some_feature THEN collect_tap(
     ok( foo(),       :test_description),
     is( foo(42), 23, :test_description)
@@ -48,34 +40,29 @@ SELECT is( foo(42), 23, :test_description);
 -- Simple pass/fail.
 SELECT pass(:test_description);
 SELECT fail(:test_description);
+
+-- 7. tell pgTAP / tests have completed
+--    -> pgTAP can output -- , BETWEEN the planned number of tests vs the number actually run, --
+--      diagnostics ABOUT
+--        failures, OR
+--        discrepancy
+SELECT * FROM finish();
+-- 7.1 if SOME test failed -> you can pass an option | `finish()`
+--      SELECT * FROM finish(true);
 ```
 
-Installation
+how to install?
 ============
 
-pgTAP must be installed on a host with PostgreSQL server running; it cannot
-be installed remotely. If you're using PostgreSQL in Docker, you need to install
-pgTAP inside the Docker container.
+* if you're using PostgreSQL | Docker -> you need to install pgTAP | the Docker container
 
-If you are using Linux, you may (depending on your distribution) be able to use
-you distribution's package management system to install pgTAP. For instance, on
-Debian, Ubuntu, or Linux Mint pgTAP can be installed with the command:
-
-    sudo apt-get install pgtap
-
-On other systems pgTAP has to be downloaded and built. First, download pgTAP
-[from PGXN](https://pgxn.org/dist/pgtap/) (click the green download button in
-the upper-right). Extract the downloaded zip file, and (at the command line)
-navigate to the extracted folder.
-
-To build pgTAP and install it into a PostgreSQL database, run the following
-commands:
-
-``` sh
-make
-make install
-make installcheck
-```
+* ways
+  * | Linux (Debian, Ubuntu, or Linux Mint),
+    * `sudo apt-get install pgtap`
+  * | OTHER OS,
+    * steps
+      * download pgTAP | https://pgxn.org/dist/pgtap/
+      * unzip the "*.zip"
 
 Potential Issues
 ----------------
@@ -189,93 +176,61 @@ export pgtag=12-alpine
 
 Then run the above commands.
 
-Adding pgTAP to a Database
+how to add pgTAP | a database?
 --------------------------
 
-Once pgTAP is installed, you can add it to a database. If you're running
-PostgreSQL 9.1.0 or greater, it's a simple as connecting to a database as a
-super user and running:
+* ⚠️requirements⚠️
+  * install pgTAP
 
-``` sql
-CREATE EXTENSION IF NOT EXISTS pgtap;
-```
+* ways
+  * | run PostgreSQL v9.1.0+,
+    * steps
+      * `psql -U postgres`
+        * == connect to a database -- as -- a super user
+      * `CREATE EXTENSION IF NOT EXISTS pgtap;`
 
-If you've upgraded your cluster to PostgreSQL 9.1 and already had pgTAP
-installed, you can upgrade it to a properly packaged extension with:
+* if pgTAP ALREADY installed & you want to upgrade it -- to -- a properly packaged extension
 
-``` sql
-CREATE EXTENSION pgtap FROM unpackaged;
-```
-If you want to install pgTAP and all of its supporting objects into a specific
-schema, use the `SCHEMA` clause to specify the schema, like so:
+    ``` sql
+    CREATE EXTENSION pgtap FROM unpackaged;
+    ```
 
-``` sql
-CREATE EXTENSION pgtap SCHEMA tap;
-```
+* install pgTAP + ALL its supporting objects | a specific schema
 
-If you want pgTAP to be available to all new databases, install it into the
-"template1" database:
+    ``` sql
+    CREATE EXTENSION pgtap SCHEMA tap;
+    ```
 
-``` sh
-psql -d template1 -C "CREATE EXTENSION pgtap"
-```
+* if you want pgTAP is AVAILABLE | ALL NEW databases -> install it | "template1" database
 
-To uninstall pgTAP, use `DROP EXTENSION`:
+    ``` sh
+    psql -d template1 -C "CREATE EXTENSION pgtap"
+    ```
 
-``` sql
-DROP EXTENSION IF EXISTS pgtap;
-```
+* if you want to uninstall pgTAP
+
+    ``` sql
+    DROP EXTENSION IF EXISTS pgtap;
+    ```
 
 pgTAP Test Scripts
 ==================
 
-You can distribute `pgtap.sql` with any PostgreSQL distribution, such as a
-custom data type. For such a case, if your users want to run your test suite
-using PostgreSQL's standard `installcheck` make target, just be sure to set
-variables to keep the tests quiet, start a transaction, load the functions in
-your test script, and then rollback the transaction at the end of the script.
-Here's an example:
+* ["pgtap.sql"](../sql)
+  * == pgTAP's code  
+  * use cases
+    * | distribute your OWN SQL code -- WITHOUT -- requiring install pgTAP -- as -- extension
+      * _Example:_ == custom data type
+      * if users want to run -- via -- `installcheck` make target ->
+        * set variables / keep tests quiet
+        * start a transaction
+        * load pgTAP -- via -- `\i pgtap.sql`
+        * rollback | end of script
+  * 's structure
+    * 
 
-```pgsql
-\unset ECHO
-\set QUIET 1
--- Turn off echo and keep things quiet.
-
--- Format the output for nice TAP.
-\pset format unaligned
-\pset tuples_only true
-\pset pager off
-
--- Revert all changes on failure.
-\set ON_ERROR_ROLLBACK 1
-\set ON_ERROR_STOP true
-
--- Load the TAP functions.
-BEGIN;
-\i pgtap.sql
-
--- Plan the tests.
-SELECT plan(1);
-
--- Run the tests.
-SELECT pass( 'My test passed, w00t!' );
-
--- Finish the tests and clean up.
-SELECT * FROM finish();
-ROLLBACK;
-```
-
-Now you're ready to run your test script!
-
-```console
-% psql -d try -Xf test.sql
-1..1
-ok 1 - My test passed, w00t!
-```
-
-You'll need to have all of those variables in the script to ensure that the
-output is proper TAP and that all changes are rolled back -- including the
-loading of the test functions -- in the event of an uncaught exception.
+* `psql -d try -Xf <pgTAPTestScript>.sql`
+  * run your test script
 
 Using `pg_prove`
 ----------------
@@ -283,7 +238,8 @@ Using `pg_prove`
 Or save yourself some effort -- and run a batch of tests scripts or all of
 your xUnit test functions at once -- by using `pg_prove`, available in the
 [TAP::Parser::SourceHandler::pgTAP](https://metacpan.org/module/TAP::Parser::SourceHandler::pgTAP)
-CPAN distribution. If you're not relying on `installcheck`, your test scripts
+CPAN distribution
+* If you're not relying on `installcheck`, your test scripts
 can be a lot less verbose; you don't need to set all the extra variables,
 because `pg_prove` takes care of that for you:
 
@@ -300,7 +256,8 @@ SELECT * FROM finish();
 ROLLBACK;
 ```
 
-Now run the tests. Here's what it looks like when the pgTAP tests are run with
+Now run the tests
+* Here's what it looks like when the pgTAP tests are run with
 `pg_prove`:
 
 ```console
@@ -322,79 +279,51 @@ through the `runtests()` function, just tell it to do so:
 pg_prove -d myapp --runtests
 ```
 
-Yep, that's all there is to it. Call `pg_prove --verbose` to see the
+Yep, that's all there is to it
+* Call `pg_prove --verbose` to see the
 individual test descriptions, `pg_prove --help` to see other supported
 options, and `pg_prove --man` to see its entire documentation.
 
-Using pgTAP
+how to use pgTAP?
 ===========
 
-The purpose of pgTAP is to provide a wide range of testing utilities that
-output TAP. TAP, or the "Test Anything Protocol", is a standard for
-representing the output from unit tests. It owes its success to its format as a
-simple text-based interface that allows for practical machine parsing and high
-legibility for humans. TAP started life as part of the test harness for Perl
-but now has implementations in C/C++, Python, PHP, JavaScript, Perl, and, of
-course, PostgreSQL.
+* ways to use pgTAP
+  1) | simple test scripts / 
+     * describe the tests 
+  2) | xUnit-style test functions / 
+     * you install | your database
+     * run ALL DIRECTLY | your chosen PostgreSQL client
 
-There are two ways to use pgTAP: 1) In simple test scripts that use a plan to
-describe the tests in the script; or 2) In xUnit-style test functions that you
-install into your database and run all at once in the PostgreSQL client of
-your choice.
-
-I love it when a plan comes together
+define a testing plan
 ------------------------------------
 
-Before anything else, you need a testing plan. This basically declares how
-many tests your script is going to run to protect against premature failure.
+* testing plan
+  * ⚠️required BEFORE EVERYTHING ELSE⚠️
+  * == 👀NUMBER of tests / your script is going to run👀
+    * Reason:🧠protect vs premature failure🧠
+    * ❌if you do NOT know BEFOREHAND -> declare that you have NO plan❌
 
-The preferred way to do this is to declare a plan by calling the `plan()`
-function:
-
-```sql
-SELECT plan(42);
-```
-
-There are rare cases when you will not know beforehand how many tests your
-script is going to run. In this case, you can declare that you have no plan.
-(Try to avoid using this as it weakens your test.)
-
-```sql
-SELECT * FROM no_plan();
-```
-
-Often, though, you'll be able to calculate the number of tests, like so:
-
-```sql
-SELECT plan( COUNT(*) )
-  FROM foo;
-```
-
-At the end of your script, you should always tell pgTAP that the tests have
-completed, so that it can output any diagnostics about failures or a
-discrepancy between the planned number of tests and the number actually run:
-
-```sql
-SELECT * FROM finish();
-```
-
-If you need to throw an exception if some test failed, you can pass an
-option to `finish()`.
-
-```sql
-SELECT * FROM finish(true);
-```
+      ```sql
+      SELECT * FROM no_plan();
+      ```
+  * steps
+    * call the `plan()`
+      * if your NUMBER of tests == certain table's NUMBER of rows -> `SELECT plan( COUNT(*) ) FROM <CERTAIN_TABLE>;`
 
 What a sweet unit!
 ------------------
 
 If you're used to xUnit testing frameworks, you can collect all of your tests
-into database functions and run them all at once with `runtests()`. The
+into database functions and run them all at once with `runtests()`
+* The
 `runtests()` function does all the work of finding and running your test
-functions in individual transactions. It even supports setup and teardown
-functions. To use it, write your unit test functions so that they return a set
+functions in individual transactions
+* It even supports setup and teardown
+functions
+* To use it, write your unit test functions so that they return a set
 of text results, and then use the pgTAP assertion functions to return TAP
-values. Here's an example, testing a hypothetical `users` table:
+values
+* Here's an example, testing a hypothetical `users` table:
 
 ```sql
 CREATE OR REPLACE FUNCTION setup_insert(
@@ -411,7 +340,8 @@ CREATE OR REPLACE FUNCTION test_user(
 $$ LANGUAGE sql;
 ```
 
-See below for details on the pgTAP assertion functions. Once you've defined
+See below for details on the pgTAP assertion functions
+* Once you've defined
 your unit testing functions, you can run your tests at any time using the
 `runtests()` function:
 
@@ -420,14 +350,17 @@ SELECT * FROM runtests();
 ```
 
 Each test function will run within its own transaction, and rolled back when
-the function completes (or after any teardown functions have run). The TAP
+the function completes (or after any teardown functions have run)
+* The TAP
 results will be sent to your client.
 
 Test Descriptions
 -----------------
 
-By convention, each test is assigned a number in order. This is largely done
-automatically for you. However, it's often very useful to describe each test.
+By convention, each test is assigned a number in order
+* This is largely done
+automatically for you
+* However, it's often very useful to describe each test.
 Would you rather see this?
 
       ok 4
@@ -9603,23 +9536,21 @@ wants, but it gets the job done. Of course, if your diagnostics use something
 other than indented "have" and "want", such failures will be easier to read.
 But either way, *do* test your diagnostics!
 
-Compatibility
+Compatibility vs PostgreSQL
 =============
 
-Here are some notes on how pgTAP is built for particular versions of
-PostgreSQL. This helps you to understand any side-effects. To see the specifics
-for each version of PostgreSQL, consult the files in the `compat/` directory in
-the pgTAP distribution.
+* [detailed](../compat)
 
-11 and Up
+PostgreSQL v11+
 ---------
 
-No changes. Everything should just work.
+* ALL should work
+  * Reason:🧠NO changes🧠
 
-10 and Down
+PostgreSQL v10-
 -----------
 
-*   The stored procedure-testing funtions are not available, because stored
+* TODO:  The stored procedure-testing funtions are not available, because stored
     procedures were not introduced until 11.
 
 9.6 and Down
@@ -9654,51 +9585,3 @@ No changes. Everything should just work.
 ------------
 No longer supported.
 
-Metadata
-========
-
-Public Repository
------------------
-
-The source code for pgTAP is available on
-[GitHub](https://github.com/theory/pgtap/). Please feel free to fork and
-contribute!
-
-Mail List
----------
-
-Join the pgTAP community by subscribing to the
-[pgtap-users mail list](https://groups.google.com/forum/#!forum/pgtap-users).
-All questions, comments, suggestions, and bug reports are welcomed there.
-
-Author
-------
-
-[David E. Wheeler](https://justatheory.com/)
-
-Credits
--------
-
-* Michael Schwern and chromatic for Test::More.
-* Adrian Howard for Test::Exception.
-
-Copyright and License
----------------------
-
-Copyright (c) 2008-2026 David E. Wheeler. Some rights reserved.
-
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose, without fee, and without a written agreement is
-hereby granted, provided that the above copyright notice and this paragraph
-and the following two paragraphs appear in all copies.
-
-IN NO EVENT SHALL DAVID E. WHEELER BE LIABLE TO ANY PARTY FOR DIRECT,
-INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST
-PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
-IF DAVID E. WHEELER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-DAVID E. WHEELER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS,
-AND DAVID E. WHEELER HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT,
-UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
