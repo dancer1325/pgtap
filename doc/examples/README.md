@@ -9,5 +9,19 @@ TODO:
 * `apt-get install pgtap`
 * `pg_prove --version`
 
+# schema testing functions
+TODO:
+
+## TODO: adjust section level
+### recommendations:
+#### `schemaTestingFunctions(lowercaseStrings)`
+* `CREATE TABLE Foo (id integer);`
+* `SELECT has_table('foo');`
+  * use `foo` 
+    * == lowercase
+#### if SQL identifier is declared -- via -- "SoMe_NamE" -> `schemaTestingFunctions(SoMe_NamE)`
+* `CREATE TABLE "Foo" (id integer);`
+* `SELECT has_table('Foo');`
+
 # TODO:
 TODO:

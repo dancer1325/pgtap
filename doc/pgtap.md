@@ -1729,171 +1729,62 @@ Diagnostics on failure are similar to those from `is()`:
     #       have: (1,Jacob)
     #       want: (1,Larry)
 
-# The Schema Things
+# schema testing functions
 
-Need to make sure that your database is designed just the way you think it
-should be? Use these test functions and rest easy.
+* goal
+  * test DB's design 
 
-A note on comparisons: pgTAP uses a simple equivalence test (`=`) to compare
-all SQL identifiers, such as the names of tables, schemas, functions, indexes,
-and columns (but not data types). So in general, you should always use
-lowercase strings when passing identifier arguments to the functions below.
-Use mixed case strings only when the objects were declared in your schema
-using double-quotes. For example, if you created a table like so:
+* pgTAP
+  * compares -- , via a ⚠️SIMPLE equivalence test (`=`)⚠️, -- ALL SQL identifiers (_Examples:_ names of tables, schemas, functions, indexes, columns)
+    * == case-sensitive
+      * -> 👀recommendations👀
+        * `schemaTestingFunctions(lowercaseStrings)`
+        * if SQL identifier is declared -- via -- "SoMe_NamE" -> `schemaTestingFunctions(SoMe_NamE)` 
+    * ❌NOT compare data types❌
 
-```sql
-CREATE TABLE Foo (id integer);
-```
+## objects
 
-Then you *must* test for it using only lowercase characters (if you want the
-test to pass):
+### EXACTLY
 
-```sql
-SELECT has_table('foo');
-```
-
-If, however, you declared the table using a double-quoted string, like so:
-
-```sql
-CREATE TABLE "Foo" (id integer);
-```
-
-Then you'd need to test for it using exactly the same string, including case,
-like so:
-
-```sql
-SELECT has_table('Foo');
-```
-
-In general, this should not be an issue, as mixed-case objects are created
-only rarely. So if you just stick to lowercase-only arguments to these
-functions, you should be in good shape.
-
-## I Object!
-
-In a busy development environment, you might have a number of users who make
-changes to the database schema. Sometimes you have to really work to keep
-these folks in line. For example, do they add objects to the database without
-adding tests? Do they drop objects that they shouldn't? These assertions are
-designed to help you ensure that the objects in the database are exactly the
-objects that should be in the database, no more, no less.
-
-Each tests tests that all of the objects in the database are only the objects
-that *should* be there. In other words, given a list of objects, say tables in
-a call to `tables_are()`, this assertion will fail if there are tables that
-are not in the list, or if there are tables in the list that are missing from
-the database. It can also be useful for testing replication and the success or
-failure of schema change deployments.
-
-If you're more interested in the specifics of particular objects, skip to
-the next section.
+* objects
+  * == ALL schema / database' elements
 
 ### `tablespaces_are()` ###
 
 ```sql
-SELECT tablespaces_are( :tablespaces, :description );
-SELECT tablespaces_are( :tablespaces );
+SELECT tablespaces_are( :arrayOfTablespaceNames, :description );
+SELECT tablespaces_are( :arrayOfTablespaceNames );
 ```
 
-**Parameters**
-
-`:tablespaces`
-: An array of tablespace names.
-
-`:description`
-: A short description of the test.
-
-This function tests that all of the tablespaces in the database only the
-tablespaces that *should* be there. Example:
-
-```sql
-SELECT tablespaces_are(ARRAY[ 'dbspace', 'indexspace' ]);
-```
-
-In the event of a failure, you'll see diagnostics listing the extra and/or
-missing tablespaces, like so:
-
-    # Failed test 121: "There should be the correct tablespaces"
-    #     Extra tablespaces:
-    #         trigspace
-    #     Missing tablespaces:
-    #         indexspace
+* if there are others (APART FROM defined | `arrayOfTablespaceNames`) -> it fails
 
 ### `schemas_are()` ###
 
 ```sql
-SELECT schemas_are( :schemas, :description );
-SELECT schemas_are( :schemas );
+SELECT schemas_are( :arrayOfSchemaNames, :description );
+SELECT schemas_are( :arrayOfSchemaNames );
 ```
 
-**Parameters**
-
-`:schemas`
-: An array of schema names.
-
-`:description`
-: A short description of the test.
-
-This function tests that all of the schemas in the database only the schemas
-that *should* be there, excluding system schemas and `information_schema`.
-Example:
-
-```sql
-SELECT schemas_are(ARRAY[ 'public', 'contrib', 'tap' ]);
-```
-
-In the event of a failure, you'll see diagnostics listing the extra and/or
-missing schemas, like so:
-
-    # Failed test 106: "There should be the correct schemas"
-    #     Extra schemas:
-    #         __howdy__
-    #     Missing schemas:
-    #         someschema
+* ❌NO verify ❌
+  * system schemas
+  * `information_schema`
 
 ### `tables_are()` ###
 
 ```sql
-SELECT tables_are( :schema, :tables, :description );
-SELECT tables_are( :schema, :tables );
-SELECT tables_are( :tables, :description );
-SELECT tables_are( :tables );
+SELECT tables_are( :schemaInWhichFindTables, :arrayOfTableNames, :description );
+SELECT tables_are( :schemaInWhichFindTables, :arrayOfTableNames );
+SELECT tables_are( :arrayOfTableNames, :description );
+SELECT tables_are( :arrayOfTableNames );
 ```
 
-**Parameters**
-
-`:schema`
-: Name of a schema in which to find tables.
-
-`:tables`
-: An array of table names.
-
-`:description`
-: A short description of the test.
-
-This function tests that all of the tables in the named schema, or that are
-visible in the search path, are only the tables that *should* be there. If the
-`:schema` argument is omitted, tables will be sought in the search path,
-excluding `pg_catalog` and `information_schema` If the description is omitted,
-a generally useful default description will be generated. Example:
-
-```sql
-SELECT tables_are(
-    'myschema',
-    ARRAY[ 'users', 'widgets', 'gadgets', 'session' ]
-);
-```
-
-In the event of a failure, you'll see diagnostics listing the extra and/or
-missing tables, like so:
-
-    # Failed test 91: "Schema public should have the correct tables"
-    #     Extra tables:
-    #         mallots
-    #         __test_table
-    #     Missing tables:
-    #         users
-    #         widgets
+* if 
+  * there are others (APART FROM defined | `arrayOfTableNames`) -> it fails
+  * `description` is omited -> generate a DEFAULT description
+  * `schemaInWhichFindTables` is omitted -> tables are found -- , based on, -- the search path
+    * EXCLUDING
+      * `pg_catalog`
+      * `information_schema`
 
 ### `partitions_are()` ###
 
@@ -1903,6 +1794,8 @@ SELECT partitions_are( :schema, :table, :partitions );
 SELECT partitions_are( :table, :partitions :description );
 SELECT partitions_are( :table, :partitions );
 ```
+
+TODO: 
 
 **Parameters**
 
@@ -2789,12 +2682,9 @@ missing extensions, like so:
     #         citext
     #         isn
 
-## To Have or Have Not
+## have OR NOT Have 
 
-Perhaps you're not so concerned with ensuring the [precise correlation of
-database objects](#I+Object! "I Object!"). Perhaps you just need to make sure
-that certain objects exist (or that certain objects *don't* exist). You've
-come to the right place.
+Perhaps you just need to make sure that certain objects exist (or that certain objects *don't* exist)
 
 ### `has_tablespace()` ###
 
@@ -4546,14 +4436,7 @@ SELECT hasnt_extension( :extension );
 This function is the inverse of `has_extension()`. The test passes if the
 specified extension does *not* exist.
 
-## Table For One
-
-Okay, you're sure that your database has exactly the [right schema](#I+Object!
-"I Object!") and that all of the objects you need [are
-there](#To+Have+or+Have+Not "To Have or Have Not"). So let's take a closer
-look at tables. There are a lot of ways to look at tables, to make sure that
-they have all the columns, indexes, constraints, keys, and indexes they need.
-So we have the assertions to validate 'em.
+## tables
 
 ### `has_column()` ###
 
