@@ -50,7 +50,18 @@ SELECT * FROM finish();
 --      SELECT * FROM finish(true);
 ```
 
-# how to install?
+# how to install / build?
+
+```sh
+# build
+make
+
+# install
+make install
+
+# install + check
+make installcheck
+```
 
 * if you're using PostgreSQL | Docker -> you need to install pgTAP | the Docker container
 
@@ -64,113 +75,82 @@ SELECT * FROM finish();
 
 ## Potential Issues
 
-If you encounter an error such as:
+* PROBLEMS:
+  * PROBLEM1: "Makefile", line 8: Need an operator
+    * SOLUTION:
 
-    "Makefile", line 8: Need an operator
+      ```sh
+      gmake
+      gmake install
+      gmake installcheck
+      ```
+  * PROBLEM2: "make: pg_config: Command not found" OR "Makefile:52: *** pgTAP requires PostgreSQL 9.1 or later."
+    * SOLUTION:
+      * install
+        * `pg_config` | your path
+        * `-devel` package
+      * `env PG_CONFIG=/path/to/pg_config make && make install && make installcheck`
+      * `env NO_PGXS=1 make && make install && make installcheck`
+        * copy the entire distribution directory | PostgreSQL source tree's "contrib/"
+  * PROBLEM3: "ERROR:  must be owner of database regression"
+    * SOLUTION: `make installcheck PGUSER=postgres`
+  * PROBLEM4: "ERROR: Missing extensions required for testing: citext isn ltree"
+    * SOLUTION: install the PostgreSQL [ADDITIONAL supplied modules](https://www.postgresql.org/docs/current/contrib.html)
+      * if you want to install the extension | PostgreSQL v18+'s CUSTOM prefix ->
+        * include the prefix | "postgresql.conf"
 
-You need to use GNU make, which may well be installed on your system as
-`gmake`:
+          ```ini
+          extension_control_path = '/usr/local/extras/postgresql/share:$system'
+          dynamic_library_path   = '/usr/local/extras/postgresql/lib:$libdir'
+          ```
 
-``` sh
-gmake
-gmake install
-gmake installcheck
-```
+        * pass the `prefix` argument
 
-If you encounter an error such as:
-
-    make: pg_config: Command not found
-
-Or:
-
-    Makefile:52: *** pgTAP requires PostgreSQL 9.1 or later. This is .  Stop.
-
-Be sure that you have `pg_config` installed and in your path. If you used a
-package management system such as RPM to install PostgreSQL, be sure that the
-`-devel` package is also installed. If necessary tell the build process where
-to find it:
-
-``` sh
-env PG_CONFIG=/path/to/pg_config make && make install && make installcheck
-```
-
-And finally, if all that fails, copy the entire distribution directory to the
-`contrib/` subdirectory of the PostgreSQL source tree and try it there without
-`pg_config`:
-
-``` sh
-env NO_PGXS=1 make && make install && make installcheck
-```
-
-If you encounter an error such as:
-
-    ERROR:  must be owner of database regression
-
-You need to run the test suite using a super user, such as the default
-"postgres" super user:
-
-``` sh
-make installcheck PGUSER=postgres
-```
-
-If you encounter an error such as:
-
-    ERROR: Missing extensions required for testing: citext isn ltree
-
-Install the PostgreSQL
-[Additional Supplied Modules](https://www.postgresql.org/docs/current/contrib.html),
-which are required to run the tests. If you used a package management system
-such as RPM to install PostgreSQL, install the `-contrib` package.
+          ```sh
+          make install prefix=/usr/local/extras
+          ```
 
 ## Testing pgTAP with pgTAP
 
-In addition to the PostgreSQL-standard `installcheck` target, the `test`
-target uses the `pg_prove` Perl program to do its testing, which needs
-to be installed separately from
-[TAP::Parser::SourceHandler::pgTAP](https://metacpan.org/module/TAP::Parser::SourceHandler::pgTAP)
-CPAN distribution. You'll need to make sure that you use a database with
-PL/pgSQL loaded, or else the tests won't work. `pg_prove` supports a number of
-environment variables that you might need to use, including all the usual
-PostgreSQL client environment variables:
+* `installcheck` target
+  * == PostgreSQL-standard 
 
-* `$PGDATABASE`
-* `$PGHOST`
-* `$PGPORT`
-* `$PGUSER`
+* `test` target
+  * -- thanks to -- `pg_prove` Perl
+  * requiremens
+    * use a database / loads PL/pgSQL
+  * ways to run it
+    * -- as -- database super user
 
-You can use it to run the test suite as a database super user like so:
+      ```shell
+      make test PGUSER=postgres
+      ```
+    * | local docker environment / latest version of PostgreSQL
 
-``` sh
-make test PGUSER=postgres
-```
+      ``` sh
+      cd test
+      docker compose build test
+      # start the postgres server in a docker container in the background
+      docker compose up -d test
+      # run the regression tests
+      docker compose exec test make install installcheck
+      # run the tests with pg_prove
+      # "run" builds and installs pgTAP, runs "CREATE EXTENSION"
+      # and then runs make test
+      docker compose exec test run
+      # Shut down the postgres container
+      docker compose down
+      ```
 
-To run the tests in a local docker environment using the latest version
-of PostgreSQL, run:
-
-``` sh
-cd test
-docker compose build test
-# start the postgres server in a docker container in the background
-docker compose up -d test
-# run the regression tests
-docker compose exec test make install installcheck
-# run the tests with pg_prove
-# "run" builds and installs pgTAP, runs "CREATE EXTENSION"
-# and then runs make test
-docker compose exec test run
-# Shut down the postgres container
-docker compose down
-```
-
-To test with a different version of PostgreSQL, set the environment variable
-`$pgtag` to one of the [PostgreSQL Docker](https://hub.docker.com/_/postgres)
-tags:
-
-``` sh
-export pgtag=12-alpine
-```
-
-Then run the above commands.
+* `pg_prove`
+  * ⚠️requirements⚠️
+    * install it -- separately from -- [TAP::Parser::SourceHandler::pgTAP](https://metacpan.org/module/TAP::Parser::SourceHandler::pgTAP)
+  * supports 
+    * environment variables (ADDITIONAL to PostgreSQL client environment variables)
+      * `$PGDATABASE`
+      * `$PGHOST`
+      * `$PGPORT`
+      * `$PGUSER`
 
 ## how to add pgTAP | a database?
 
@@ -215,67 +195,51 @@ Then run the above commands.
   * use cases
     * | distribute your OWN SQL code -- WITHOUT -- requiring install pgTAP -- as -- extension
       * _Example:_ == custom data type
-      * if users want to run -- via -- `installcheck` make target ->
-        * set variables / keep tests quiet
-        * start a transaction
-        * load pgTAP -- via -- `\i pgtap.sql`
-        * rollback | end of script
-  * 's structure
-    * 
+  * ['s structure](#synopsis)
 
-* `psql -d try -Xf <pgTAPTestScript>.sql`
-  * run your test script
+* ways to run pgTAP test scripts
+  * -- via -- [`installcheck` make target](../Makefile)
+  * -- via -- [`pg_prove`](#---via----pg_prove)
+  * `psql -d try -Xf <pgTAPTestScript>.sql`
 
-## Using `pg_prove`
+## -- via -- `installcheck` make target
 
-Or save yourself some effort -- and run a batch of tests scripts or all of
-your xUnit test functions at once -- by using `pg_prove`, available in the
-[TAP::Parser::SourceHandler::pgTAP](https://metacpan.org/module/TAP::Parser::SourceHandler::pgTAP)
-CPAN distribution
-* If you're not relying on `installcheck`, your test scripts
-can be a lot less verbose; you don't need to set all the extra variables,
-because `pg_prove` takes care of that for you:
+* | scripts tests,
+  * ⚠️requirements⚠️
+    * set variables / keep tests quiet
+    * start a transaction
+    * load pgTAP -- via -- `\i pgtap.sql`
+    * rollback | end of script
 
-```sql
--- Start transaction and plan the tests.
-BEGIN;
-SELECT plan(1);
+## -- via -- `pg_prove`?
 
--- Run the tests.
-SELECT pass( 'My test passed, w00t!' );
+* | script tests,
+  * LESS verbose
+    * ❌== NOT need to set ALL EXTRA variables❌
+    * Reason:🧠`pg_prove` takes care of set ALL EXTRA variables🧠
 
--- Finish the tests and clean up.
-SELECT * FROM finish();
-ROLLBACK;
-```
+* ways
+  * | simple test scripts
 
-Now run the tests
-* Here's what it looks like when the pgTAP tests are run with
-`pg_prove`:
+    ```sh
+    pg_prove -U <POSTGRES_USER> <TEST_FILE>.sql
+    ```
 
-```console
-% pg_prove -U postgres sql/*.sql
-sql/coltap.....ok
-sql/hastap.....ok
-sql/moretap....ok
-sql/pg73.......ok
-sql/pktap......ok
-All tests successful.
-Files=5, Tests=216,  1 wallclock secs ( 0.06 usr  0.02 sys +  0.08 cusr  0.07 csys =  0.23 CPU)
-Result: PASS
-```
+  * | xUnit-style test style
 
-If you're using xUnit tests and just want to have `pg_prove` run them all
-through the `runtests()` function, just tell it to do so:
+    ```sh
+    pg_prove -d myapp --runtests
+    ```
 
-```sh
-pg_prove -d myapp --runtests
-```
-
-Yep, that's all there is to it
-* Call `pg_prove --verbose` to see the
-individual test descriptions, `pg_prove --help` to see other supported
-options, and `pg_prove --man` to see its entire documentation.
+* `pg_prove --verbose` 
+  * 's return
+    * individual test descriptions
+* `pg_prove --help`
+  * 's return
+    * OTHER supported options
+* `pg_prove --man`
+  * 's return
+    * test entire documentation
 
 # how to use pgTAP?
 
