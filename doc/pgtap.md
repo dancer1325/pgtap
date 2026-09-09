@@ -1749,7 +1749,7 @@ Diagnostics on failure are similar to those from `is()`:
 * objects
   * == ALL schema / database' elements
 
-### `tablespaces_are()` ###
+#### `tablespaces_are()` ###
 
 ```sql
 SELECT tablespaces_are( :arrayOfTablespaceNames, :description );
@@ -1758,7 +1758,7 @@ SELECT tablespaces_are( :arrayOfTablespaceNames );
 
 * if there are others (APART FROM defined | `arrayOfTablespaceNames`) -> it fails
 
-### `schemas_are()` ###
+#### `schemas_are()` ###
 
 ```sql
 SELECT schemas_are( :arrayOfSchemaNames, :description );
@@ -1769,7 +1769,7 @@ SELECT schemas_are( :arrayOfSchemaNames );
   * system schemas
   * `information_schema`
 
-### `tables_are()` ###
+#### `tables_are()` ###
 
 ```sql
 SELECT tables_are( :schemaInWhichFindTables, :arrayOfTableNames, :description );
@@ -1786,7 +1786,7 @@ SELECT tables_are( :arrayOfTableNames );
       * `pg_catalog`
       * `information_schema`
 
-### `partitions_are()` ###
+#### `partitions_are()` ###
 
 ```sql
 SELECT partitions_are( :schema, :table, :partitions :description );
@@ -1849,7 +1849,7 @@ missing partitions, like so:
     #         part5
     #         part6
 
-### `foreign_tables_are()` ###
+#### `foreign_tables_are()` ###
 
 ```sql
 SELECT foreign_tables_are( :schema, :foreign_tables, :description );
@@ -1894,7 +1894,7 @@ missing foreign tables, like so:
     #         users
     #         widgets
 
-### `views_are()` ###
+#### `views_are()` ###
 
 ```sql
 SELECT views_are( :schema, :views, :description );
@@ -1938,7 +1938,7 @@ missing views, like so:
     #         v_userlog
     #         eated
 
-### `materialized_views_are()` ###
+#### `materialized_views_are()` ###
 
 ```sql
 SELECT materialized_views_are( :schema, :materialized_views, :description );
@@ -1983,7 +1983,7 @@ missing materialized views, like so:
     #         v_userlog
     #         eated
 
-### `sequences_are()` ###
+#### `sequences_are()` ###
 
 ```sql
 SELECT sequences_are( :schema, :sequences, :description );
@@ -2027,7 +2027,7 @@ missing sequences, like so:
     #         users_seq
     #         widgets_seq
 
-### `columns_are()` ###
+#### `columns_are()` ###
 
 ```sql
 SELECT columns_are( :schema, :table, :columns, :description );
@@ -2074,7 +2074,7 @@ missing columns, like so:
     #     Missing columns:
     #         name
 
-### `indexes_are()` ###
+#### `indexes_are()` ###
 
 ```sql
 SELECT indexes_are( :schema, :table, :indexes, :description );
@@ -2120,7 +2120,7 @@ missing indexes, like so:
     #     Missing indexes:
     #         idx_fou_name
 
-### `triggers_are()` ###
+#### `triggers_are()` ###
 
 ```sql
 SELECT triggers_are( :schema, :table, :triggers, :description );
@@ -2166,49 +2166,23 @@ missing triggers, like so:
     #     Missing triggers:
     #         set_users_pass
 
-### `functions_are()` ###
+#### `functions_are()` ###
 
 ```sql
-SELECT functions_are( :schema, :functions, :description );
-SELECT functions_are( :schema, :functions );
-SELECT functions_are( :functions, :description );
-SELECT functions_are( :functions );
+SELECT functions_are( :schemaInWhichFindFunctions, :arrayOfFunctionsOrProcedureNames, :description );
+SELECT functions_are( :schemaInWhichFindFunctions, :arrayOfFunctionsOrProcedureNames );
+SELECT functions_are( :arrayOfFunctionsOrProcedureNames, :description );
+SELECT functions_are( :arrayOfFunctionsOrProcedureNames );
 ```
 
-**Parameters**
-
-`:schema`
-: Name of a schema in which to find functions.
-
-`:functions`
-: An array of function and/or procedure names.
-
-`:description`
-: A short description of the test.
-
-This function tests that all of the functions or procedures in the named schema,
+* TODO: This function tests that all of the functions or procedures in the named schema,
 or that are visible in the search path, are only the functions that *should* be
-there. If the `:schema` argument is omitted, functions will be sought in the
+there
+* If the `:schema` argument is omitted, functions will be sought in the
 search path, excluding `pg_catalog` and `information_schema` If the description
-is omitted, a generally useful default description will be generated. Example:
+is omitted, a generally useful default description will be generated
 
-```sql
-SELECT functions_are(
-    'myschema',
-    ARRAY[ 'foo', 'bar', 'frobnitz' ]
-);
-```
-
-In the event of a failure, you'll see diagnostics listing the extra and/or
-missing functions, like so:
-
-    # Failed test 150: "Schema someschema should have the correct functions"
-    #     Extra functions:
-    #         schnauzify
-    #     Missing functions:
-    #         frobnitz
-
-### `roles_are()` ###
+#### `roles_are()` ###
 
 ```sql
 SELECT roles_are( :roles, :description );
@@ -2239,7 +2213,7 @@ missing roles, like so:
     #     Missing roles:
     #         bobby
 
-### `users_are()` ###
+#### `users_are()` ###
 
 ```sql
 SELECT users_are( :users, :description );
@@ -2270,7 +2244,7 @@ missing users, like so:
     #     Missing users:
     #         bobby
 
-### `groups_are()` ###
+#### `groups_are()` ###
 
 ```sql
 SELECT groups_are( :groups, :description );
@@ -2301,7 +2275,7 @@ missing groups, like so:
     #     Missing groups:
     #         __howdy__
 
-### `languages_are()` ###
+#### `languages_are()` ###
 
 ```sql
 SELECT languages_are( :languages, :description );
@@ -2332,7 +2306,7 @@ missing languages, like so:
     #     Missing languages:
     #         plpgsql
 
-### `opclasses_are()` ###
+#### `opclasses_are()` ###
 
 ```sql
 SELECT opclasses_are( :schema, :opclasses, :description );
@@ -2375,7 +2349,7 @@ missing opclasses, like so:
     #     Missing operator classes:
     #         custom_ops
 
-### `rules_are()` ###
+#### `rules_are()` ###
 
 ```sql
 SELECT rules_are( :schema, :table, :rules, :description );
@@ -2421,7 +2395,7 @@ missing rules, like so:
     #     Missing rules:
     #         on_delete
 
-### `types_are()` ###
+#### `types_are()` ###
 
 ```sql
 SELECT types_are( :schema, :types, :description );
@@ -2459,7 +2433,7 @@ missing types, like so:
     #     Missing types:
     #         timezone
 
-### `domains_are()` ###
+#### `domains_are()` ###
 
 ```sql
 SELECT domains_are( :schema, :domains, :description );
@@ -2498,7 +2472,7 @@ missing domains, like so:
     #     Missing domains:
     #         timezone
 
-### `enums_are()` ###
+#### `enums_are()` ###
 
 ```sql
 SELECT enums_are( :schema, :enums, :description );
@@ -2536,7 +2510,7 @@ missing enums, like so:
     #     Missing enums:
     #         bug_status
 
-### `casts_are()` ###
+#### `casts_are()` ###
 
 ```sql
 SELECT casts_are( :casts, :description );
@@ -2579,7 +2553,7 @@ missing casts, like so:
     #     Missing casts:
     #         lseg AS integer
 
-### `operators_are()` ###
+#### `operators_are()` ###
 
 ```sql
 SELECT operators_are( :schema, :operators, :description );
@@ -2635,7 +2609,7 @@ missing operators, like so:
     #     Missing enums:
     #         +(integer,text) RETURNS text
 
-### `extensions_are()` ###
+#### `extensions_are()` ###
 
 ```sql
 SELECT extensions_are( :schema, :extensions, :description );
@@ -2682,39 +2656,19 @@ missing extensions, like so:
     #         citext
     #         isn
 
-## have OR NOT Have 
+### have OR NOT Have 
 
-Perhaps you just need to make sure that certain objects exist (or that certain objects *don't* exist)
+* != check EXACTLY the NUMBER of objects
 
-### `has_tablespace()` ###
+#### `has_tablespace()` ###
 
 ```sql
-SELECT has_tablespace( :tablespace, :location, :description );
-SELECT has_tablespace( :tablespace, :description );
-SELECT has_tablespace( :tablespace );
+SELECT has_tablespace( :tableSpaceName, :tableSpaceLocationOnDisk, :description );
+SELECT has_tablespace( :tableSpaceName, :description );
+SELECT has_tablespace( :tableSpaceName );
 ```
 
-**Parameters**
-
-`:tablespace`
-: Name of a tablespace.
-
-`:location`
-: The tablespace's Location on disk.
-
-`:description`
-: A short description of the test.
-
-This function tests whether or not a tablespace exists in the database. The
-first argument is a tablespace name. The second is either the a file system
-path for the database or a test description. If you specify a location path,
-you must pass a description as the third argument; otherwise, if you omit the
-test description, it will be set to "Tablespace `:tablespace` should exist".
-Example:
-
-    SELECT has_tablespace('sometablespace', '/data/dbs');
-
-### `hasnt_tablespace()` ###
+#### `hasnt_tablespace()` ###
 
 ```sql
 SELECT hasnt_tablespace( :tablespace, :description );
@@ -2732,7 +2686,7 @@ SELECT hasnt_tablespace( :tablespace );
 This function is the inverse of `has_tablespace()`. The test passes if the
 specified tablespace does *not* exist.
 
-### `has_schema()` ###
+#### `has_schema()` ###
 
 ```sql
 SELECT has_schema( :schema, :description );
@@ -2751,7 +2705,7 @@ This function tests whether or not a schema exists in the database. The first
 argument is a schema name and the second is the test description. If you omit
 the test description, it will be set to "Schema `:schema` should exist".
 
-### `hasnt_schema()` ###
+#### `hasnt_schema()` ###
 
 ```sql
 SELECT hasnt_schema(
@@ -2771,7 +2725,7 @@ SELECT hasnt_schema(
 This function is the inverse of `has_schema()`. The test passes if the
 specified schema does *not* exist.
 
-### `has_relation()` ###
+#### `has_relation()` ###
 
 ```sql
 SELECT has_relation( :schema, :relation, :description );
@@ -2803,7 +2757,7 @@ SELECT has_relation('myschema', 'somerelation');
 If you omit the test description, it will be set to "Relation `:relation`
 should exist".
 
-### `hasnt_relation()` ###
+#### `hasnt_relation()` ###
 
 ```sql
 SELECT hasnt_relation( :schema, :relation, :description );
@@ -2825,7 +2779,7 @@ SELECT hasnt_relation( :relation );
 This function is the inverse of `has_relation()`. The test passes if the
 specified relation does *not* exist.
 
-### `has_table()` ###
+#### `has_table()` ###
 
 ```sql
 SELECT has_table( :schema, :table, :description );
@@ -2860,7 +2814,7 @@ exist".
 Note that this function will not recognize foreign tables; use
 `has_foreign_table()` to test for the presence of foreign tables.
 
-### `hasnt_table()` ###
+#### `hasnt_table()` ###
 
 ```sql
 SELECT hasnt_table( :schema, :table, :description );
@@ -2883,7 +2837,7 @@ SELECT hasnt_table( :table );
 This function is the inverse of `has_table()`. The test passes if the
 specified table does *not* exist.
 
-### `has_view()` ###
+#### `has_view()` ###
 
 ```sql
 SELECT has_view( :schema, :view, :description );
@@ -2915,7 +2869,7 @@ SELECT has_view('myschema', 'someview');
 If you omit the test description, it will be set to "View `:view` should
 exist".
 
-### `hasnt_view()` ###
+#### `hasnt_view()` ###
 
 ```sql
 SELECT hasnt_view( :schema, :view, :description );
@@ -2938,7 +2892,7 @@ SELECT hasnt_view( :view );
 This function is the inverse of `has_view()`. The test passes if the
 specified view does *not* exist.
 
-### `has_materialized_view()` ###
+#### `has_materialized_view()` ###
 
 ```sql
 SELECT has_materialized_view( :schema, :materialized_view, :description );
@@ -2969,7 +2923,7 @@ SELECT has_materialized_view('myschema', 'some_materialized_view');
 If you omit the test description, it will be set to "Materialized view `:materialized_view` should
 exist".
 
-### `hasnt_materialized_view()` ###
+#### `hasnt_materialized_view()` ###
 
 ```sql
 SELECT hasnt_materialized_view( :schema, :materialized_view, :description );
@@ -2991,7 +2945,7 @@ SELECT hasnt_materialized_view( :materialized_view );
 This function is the inverse of `has_view()`. The test passes if the
 specified materialized view does *not* exist.
 
-### `has_inherited_tables()`
+#### `has_inherited_tables()`
 
 ```sql
 SELECT has_inherited_tables( :schema, :table, :description );
@@ -3019,7 +2973,7 @@ description, cast the table to the `NAME` type:
 SELECT has_inherited_tables('myschema', 'sometable'::NAME);
 ```
 
-### `hasnt_inherited_tables()`
+#### `hasnt_inherited_tables()`
 
 ```sql
 SELECT hasnt_inherited_tables( :schema, :table, :description );
@@ -3046,7 +3000,7 @@ the `NAME` type:
 
     SELECT hasnt_inherited_tables('myschema', 'sometable'::NAME);
 
-### `is_ancestor_of()`
+#### `is_ancestor_of()`
 
 ```sql
 SELECT is_ancestor_of( :ancestor_schema, :ancestor_table, :descendent_schema, :descendent_table, :depth, :description );
@@ -3091,7 +3045,7 @@ substitute will be created.
 
     SELECT is_ancestor_of('myschema', 'ancestor', 'myschema', 'descendent'::NAME);
 
-### `isnt_ancestor_of()`
+#### `isnt_ancestor_of()`
 
 ```sql
 SELECT isnt_ancestor_of( :ancestor_schema, :ancestor_table, :descendent_schema, :descendent_table, :depth, :description );
@@ -3136,7 +3090,7 @@ reasonable substitute will be created.
 
     SELECT isnt_ancestor_of('myschema', 'ancestor', 'myschema', 'descendent'::NAME);
 
-### `is_descendent_of()`
+#### `is_descendent_of()`
 
 ```sql
 SELECT is_descendent_of( :descendent_schema, :descendent_table, :ancestor_schema, :ancestor_table, :depth, :description );
@@ -3172,7 +3126,7 @@ SELECT is_descendent_of( :descendent_table,  :ancestor_table );
 This function provide exactly the same functionality as `is_ancestor_of()`, but
 with the ancestor and descendent arguments swapped.
 
-### `isnt_descendent_of()`
+#### `isnt_descendent_of()`
 
 ```sql
 SELECT isnt_descendent_of( :descendent_schema, :descendent_table, :ancestor_schema, :ancestor_table, :depth, :description );
@@ -3207,7 +3161,7 @@ SELECT isnt_descendent_of( :descendent_table,  :ancestor_table );
 This function provide exactly the same functionality as `isnt_ancestor_of()`,
 but with the ancestor and descendent arguments swapped.
 
-### `has_sequence()` ###
+#### `has_sequence()` ###
 
 ```sql
 SELECT has_sequence( :schema, :sequence, :description );
@@ -3244,7 +3198,7 @@ call seems to be getting confused, cast the sequence to the `NAME` type:
 SELECT has_sequence('myschema', 'somesequence'::NAME);
 ```
 
-### `hasnt_sequence()` ###
+#### `hasnt_sequence()` ###
 
 ```sql
 SELECT hasnt_sequence( :schema, :sequence, :description );
@@ -3266,7 +3220,7 @@ SELECT hasnt_sequence( :sequence );
 This function is the inverse of `has_sequence()`. The test passes if the
 specified sequence does *not* exist.
 
-### `has_foreign_table()` ###
+#### `has_foreign_table()` ###
 
 ```sql
 SELECT has_foreign_table( :schema, :table, :description );
@@ -3296,7 +3250,7 @@ be visible in the search path. Example:
 If you omit the test description, it will be set to "Foreign table `:table`
 should exist".
 
-### `hasnt_foreign_table()` ###
+#### `hasnt_foreign_table()` ###
 
 ```sql
 SELECT hasnt_foreign_table( :schema, :table, :description );
@@ -3319,7 +3273,7 @@ SELECT hasnt_foreign_table( :table );
 This function is the inverse of `has_foreign_table()`. The test passes if the
 specified foreign table does *not* exist.
 
-### `has_type()` ###
+#### `has_type()` ###
 
 ```sql
 SELECT has_type( schema, type, description );
@@ -3362,7 +3316,7 @@ SELECT has_column( 'foo', 'id' );
 SELECT col_type_is( 'foo', 'id', 'integer' );
 ```
 
-### `hasnt_type()` ###
+#### `hasnt_type()` ###
 
 ```sql
 SELECT hasnt_type( schema, type, description );
@@ -3385,7 +3339,7 @@ SELECT hasnt_type( type );
 This function is the inverse of `has_type()`. The test passes if the specified
 type does *not* exist.
 
-### `has_composite()` ###
+#### `has_composite()` ###
 
 ```sql
 SELECT has_composite( schema, type, description );
@@ -3420,7 +3374,7 @@ If you're passing a schema and composite type rather than composite type and
 description, be sure to cast the arguments to `name` values so that your
 composite type name doesn't get treated as a description.
 
-### `hasnt_composite()` ###
+#### `hasnt_composite()` ###
 
 ```sql
 SELECT hasnt_composite( schema, type, description );
@@ -3443,7 +3397,7 @@ SELECT hasnt_composite( type );
 This function is the inverse of `has_composite()`. The test passes if the
 specified composite type does *not* exist.
 
-### `has_domain()` ###
+#### `has_domain()` ###
 
 ```sql
 SELECT has_domain( schema, domain, description );
@@ -3477,7 +3431,7 @@ If you're passing a schema and domain rather than domain and description, be
 sure to cast the arguments to `name` values so that your domain name doesn't
 get treated as a description.
 
-### `hasnt_domain()` ###
+#### `hasnt_domain()` ###
 
 ```sql
 SELECT hasnt_domain( schema, domain, description );
@@ -3500,7 +3454,7 @@ SELECT hasnt_domain( domain );
 This function is the inverse of `has_domain()`. The test passes if the specified
 domain does *not* exist.
 
-### `has_enum()` ###
+#### `has_enum()` ###
 
 ```sql
 SELECT has_enum( schema, enum, description );
@@ -3534,7 +3488,7 @@ If you're passing a schema and enum rather than enum and description, be sure
 to cast the arguments to `name` values so that your enum name doesn't get
 treated as a description.
 
-### `hasnt_enum()` ###
+#### `hasnt_enum()` ###
 
 ```sql
 SELECT hasnt_enum( schema, enum, description );
@@ -3557,7 +3511,7 @@ SELECT hasnt_enum( enum );
 This function is the inverse of `has_enum()`. The test passes if the specified
 enum does *not* exist.
 
-### `has_index()` ###
+#### `has_index()` ###
 
 ```sql
 SELECT has_index( :schema, :table, :index, :columns, :description );
@@ -3648,7 +3602,7 @@ SELECT has_index(
 This caveat applies only to column names, not to table and schema names,
 which should omit double-quoting.
 
-### `hasnt_index()` ###
+#### `hasnt_index()` ###
 
 ```sql
 SELECT hasnt_index( schema, table, index, description );
@@ -3674,7 +3628,7 @@ SELECT hasnt_index( table, index );
 This function is the inverse of `has_index()`. The test passes if the
 specified index does *not* exist.
 
-### `has_trigger()` ###
+#### `has_trigger()` ###
 
 ```sql
 SELECT has_trigger( :schema, :table, :trigger, :description );
@@ -3701,7 +3655,7 @@ Tests to see if the specified table has the named trigger. The `:description`
 is optional, and if the schema is omitted, the table with which the trigger is
 associated must be visible in the search path.
 
-### `hasnt_trigger()` ###
+#### `hasnt_trigger()` ###
 
 ```sql
 SELECT hasnt_trigger( :schema, :table, :trigger, :description );
@@ -3727,7 +3681,7 @@ SELECT hasnt_trigger( :table, :trigger );
 This function is the inverse of `has_trigger()`. The test passes if the
 specified trigger does *not* exist.
 
-### `has_rule()` ###
+#### `has_rule()` ###
 
 ```sql
 SELECT has_rule( :schema, :table, :rule, :description );
@@ -3754,7 +3708,7 @@ Tests to see if the specified table has the named rule. The `:description` is
 optional, and if the schema is omitted, the table with which the rule is
 associated must be visible in the search path.
 
-### `hasnt_rule()` ###
+#### `hasnt_rule()` ###
 
 ```sql
 SELECT hasnt_rule( :schema, :table, :rule, :description );
@@ -3780,7 +3734,7 @@ SELECT hasnt_rule( :table, :rule );
 This function is the inverse of `has_rule()`. The test passes if the specified
 rule does *not* exist.
 
-### `has_function()` ###
+#### `has_function()` ###
 
 ```sql
 SELECT has_function( :schema, :function, :args, :description );
@@ -3843,7 +3797,7 @@ SELECT has_function( 'lower', '{text}'::name[] );
 still available, but emits a warning when called. It will be removed in a
 future version of pgTAP.
 
-### `hasnt_function()` ###
+#### `hasnt_function()` ###
 
 ```sql
 SELECT hasnt_function( :schema, :function, :args, :description );
@@ -3874,7 +3828,7 @@ This function is the inverse of `has_function()`. The test passes if the
 specified function or procedure (optionally with the specified signature) does
 *not* exist.
 
-### `has_cast()` ###
+#### `has_cast()` ###
 
 ```sql
 SELECT has_cast( :source_type, :target_type, :schema, :function, :description );
@@ -3934,7 +3888,7 @@ SELECT has_cast( 'integer', 'bit(128)' );
 SELECT has_cast( 'integer', 'bit' );
 ```
 
-### `hasnt_cast()` ###
+#### `hasnt_cast()` ###
 
 ```sql
 SELECT hasnt_cast( :source_type, :target_type, :schema, :function, :description );
@@ -3965,7 +3919,7 @@ SELECT hasnt_cast( :source_type, :target_type );
 This function is the inverse of `has_cast()`: the test passes if the specified
 cast does *not* exist.
 
-### `has_operator()` ###
+#### `has_operator()` ###
 
 ```sql
 SELECT has_operator( :left_type, :schema, :name, :right_type, :return_type, :description );
@@ -4014,7 +3968,7 @@ for you. The return value is also optional. If you need to test for a left
 (prefix) or right (postfix) unary operator, use `has_leftop()` or
 `has_rightop()` instead.
 
-### `hasnt_operator()` ###
+#### `hasnt_operator()` ###
 
 ```sql
 SELECT hasnt_operator( :left_type, :schema, :name, :right_type, :return_type, :description );
@@ -4048,7 +4002,7 @@ SELECT hasnt_operator( :left_type, :name, :right_type );
 This function is the inverse of `has_operator()`. The test passes if the
 specified operator does *not* exist.
 
-### `has_leftop()` ###
+#### `has_leftop()` ###
 
 ```sql
 SELECT has_leftop( :schema, :name, :type, :return_type, :description );
@@ -4088,7 +4042,7 @@ If you omit the schema name, then the operator must be visible in the search
 path. If you omit the test description, pgTAP will generate a reasonable one
 for you. The return type is also optional.
 
-### `hasnt_leftop()` ###
+#### `hasnt_leftop()` ###
 
 ```sql
 SELECT hasnt_leftop( :schema, :name, :type, :return_type, :description );
@@ -4119,7 +4073,7 @@ SELECT hasnt_leftop( :name, :type );
 This function is the inverse of `has_leftop()`. The test passes if the
 specified operator does *not* exist.
 
-### `has_rightop()` ###
+#### `has_rightop()` ###
 
 ```sql
 SELECT has_rightop( :schema, :name, :type, :return_type, :description );
@@ -4160,7 +4114,7 @@ If you omit the schema name, then the operator must be visible in the search
 path. If you omit the test description, pgTAP will generate a reasonable one
 for you. The return type is also optional.
 
-### `hasnt_rightop()` ###
+#### `hasnt_rightop()` ###
 
 ```sql
 SELECT hasnt_rightop( :schema, :name, :type, :return_type, :description );
@@ -4191,7 +4145,7 @@ SELECT hasnt_rightop( :name, :type );
 This function is the inverse of `hasnt_rightop()`. The test passes if the
 specified operator does *not* exist.
 
-### `has_opclass()` ###
+#### `has_opclass()` ###
 
 ```sql
 SELECT has_opclass( :schema, :name, :description );
@@ -4216,7 +4170,7 @@ the operator must be visible in the search path. If you omit the test
 description, pgTAP will generate a reasonable one for you. The return value is
 also optional.
 
-### `hasnt_opclass()` ###
+#### `hasnt_opclass()` ###
 
 ```sql
 SELECT hasnt_opclass( :schema, :name, :description );
@@ -4239,7 +4193,7 @@ SELECT hasnt_opclass( :name );
 This function is the inverse of `has_opclass()`. The test passes if the
 specified operator class does *not* exist.
 
-### `has_role()` ###
+#### `has_role()` ###
 
 ```sql
 SELECT has_role( :role, :description );
@@ -4257,7 +4211,7 @@ SELECT has_role( :role );
 Checks to ensure that a database role exists. If the description is omitted,
 it will default to "Role `:role` should exist".
 
-### `hasnt_role()` ###
+#### `hasnt_role()` ###
 
 ```sql
 SELECT hasnt_role( :role, :description );
@@ -4275,7 +4229,7 @@ SELECT hasnt_role( :role );
 The inverse of `has_role()`, this function tests for the *absence* of a
 database role.
 
-### `has_user()` ###
+#### `has_user()` ###
 
 ```sql
 SELECT has_user( :user, :description );
@@ -4293,7 +4247,7 @@ SELECT has_user( :user );
 Checks to ensure that a database user exists. If the description is omitted,
 it will default to "User `:user` should exist".
 
-### `hasnt_user()` ###
+#### `hasnt_user()` ###
 
 ```sql
 SELECT hasnt_user( :user, :description );
@@ -4311,7 +4265,7 @@ SELECT hasnt_user( :user );
 The inverse of `has_user()`, this function tests for the *absence* of a
 database user.
 
-### `has_group()` ###
+#### `has_group()` ###
 
 ```sql
 SELECT has_group( :group, :description );
@@ -4329,7 +4283,7 @@ SELECT has_group( :group );
 Checks to ensure that a database group exists. If the description is omitted,
 it will default to "Group `:group` should exist".
 
-### `hasnt_group()` ###
+#### `hasnt_group()` ###
 
 ```sql
 SELECT hasnt_group( :group, :description );
@@ -4347,7 +4301,7 @@ SELECT hasnt_group( :group );
 The inverse of `has_group()`, this function tests for the *absence* of a
 database group.
 
-### `has_language()` ###
+#### `has_language()` ###
 
 ```sql
 SELECT has_language( :language, :description );
@@ -4365,7 +4319,7 @@ SELECT has_language( :language );
 Checks to ensure that a procedural language exists. If the description is
 omitted, it will default to "Procedural language `:language` should exist".
 
-### `hasnt_language()` ###
+#### `hasnt_language()` ###
 
 ```sql
 SELECT hasnt_language( :language, :description );
@@ -4383,7 +4337,7 @@ SELECT hasnt_language( :language );
 The inverse of `has_language()`, this function tests for the *absence* of a
 procedural language.
 
-### `has_extension()` ###
+#### `has_extension()` ###
 
 ```sql
 SELECT has_extension( :schema, :extension, :description );
@@ -4414,7 +4368,7 @@ exist". Example:
 SELECT has_extension('public', 'pgtap');
 ```
 
-### `hasnt_extension()` ###
+#### `hasnt_extension()` ###
 
 ```sql
 SELECT hasnt_extension( :schema, :extension, :description );
@@ -4438,7 +4392,7 @@ specified extension does *not* exist.
 
 ## tables
 
-### `has_column()` ###
+#### `has_column()` ###
 
 ```sql
 SELECT has_column( :schema, :table, :column, :description );
@@ -4467,7 +4421,7 @@ schema is omitted, the table must be visible in the search path. If the test
 description is omitted, it will be set to "Column `:table.:column` should
 exist".
 
-### `hasnt_column()` ###
+#### `hasnt_column()` ###
 
 ```sql
 SELECT hasnt_column( :schema, :table, :column, :description );
@@ -4493,7 +4447,7 @@ This function is the inverse of `has_column()`. The test passes if the
 specified column does *not* exist in the specified table, view, materialized
 view or composite type.
 
-### `col_not_null()` ###
+#### `col_not_null()` ###
 
 ```sql
 SELECT col_not_null( :schema, :table, :column, :description );
@@ -4525,7 +4479,7 @@ test will fail with a useful diagnostic message if the table or column in
 question does not exist. But use `has_column()` to make sure the column exists
 first, eh?
 
-### `col_is_null()` ###
+#### `col_is_null()` ###
 
 ```sql
 SELECT col_is_null( :schema, :table, :column, :description );
@@ -4557,7 +4511,7 @@ the search path. If the test description is omitted, it will be set to "Column
 useful diagnostic message if the table or column in question does not exist.
 But use `has_column()` to make sure the column exists first, eh?
 
-### `col_has_default()` ###
+#### `col_has_default()` ###
 
 ```sql
 SELECT col_has_default( :schema, :table, :column, :description );
@@ -4586,7 +4540,7 @@ useful diagnostics to let you know:
     # Failed test 136: "desc"
     #     Column public.sometab.__asdfasdfs__ does not exist
 
-### `col_hasnt_default()` ###
+#### `col_hasnt_default()` ###
 
 ```sql
 SELECT col_hasnt_default( :schema, :table, :column, :description );
@@ -4612,7 +4566,7 @@ This function is the inverse of `col_has_default()`. The test passes if the
 specified column does *not* have a default. It will still fail if the column
 does not exist, and emit useful diagnostics to let you know.
 
-### `col_type_is()` ###
+#### `col_type_is()` ###
 
 ```sql
 SELECT col_type_is( :schema, :table, :column, :type_schema, :type, :description );
@@ -4696,7 +4650,7 @@ It will even tell you if the test fails because a column doesn't exist or if
 the type doesn't exist. But use `has_column()` to make sure the column exists
 first, eh?
 
-### `col_default_is()` ###
+#### `col_default_is()` ###
 
 ```sql
 SELECT col_default_is( :schema, :table, :column, :default, :description );
@@ -4803,7 +4757,7 @@ the diagnostics will tell you that, too. But you use `has_column()` and
 `col_has_default()` to test those conditions before you call
 `col_default_is()`, right? *Right???* Yeah, good, I thought so.
 
-### `has_pk()` ###
+#### `has_pk()` ###
 
 ```sql
 SELECT has_pk( :schema, :table, :description );
@@ -4837,7 +4791,7 @@ description, cast the table to the `NAME` type:
 SELECT has_pk( 'myschema', 'mytable'::name );
 ```
 
-### `hasnt_pk()` ###
+#### `hasnt_pk()` ###
 
 ```sql
 SELECT hasnt_pk( :schema, :table, :description );
@@ -4860,7 +4814,7 @@ SELECT hasnt_pk( :table );
 This function is the inverse of `has_pk()`. The test passes if the specified
 primary key does *not* exist.
 
-### `has_fk()` ###
+#### `has_fk()` ###
 
 ```sql
 SELECT has_fk( :schema, :table, :description );
@@ -4887,7 +4841,7 @@ path. If the test description is omitted, it will be set to "Table `:table`
 should have a foreign key constraint". Note that this test will fail if the
 table in question does not exist.
 
-### `hasnt_fk()` ###
+#### `hasnt_fk()` ###
 
 ```sql
 SELECT hasnt_fk( :schema, :table, :description );
@@ -4910,7 +4864,7 @@ SELECT hasnt_fk( :table );
 This function is the inverse of `has_fk()`. The test passes if the specified
 foreign key does *not* exist.
 
-### `col_is_pk()` ###
+#### `col_is_pk()` ###
 
 ```sql
 SELECT col_is_pk( :schema, :table, :columns, :description );
@@ -4968,7 +4922,7 @@ Will produce something like this:
     #         have: {}
     #         want: {id}
 
-### `col_isnt_pk()` ###
+#### `col_isnt_pk()` ###
 
 ```sql
 SELECT col_isnt_pk( :schema, :table, :columns, :description );
@@ -4999,7 +4953,7 @@ SELECT col_isnt_pk( :table, :column );
 This function is the inverse of `col_is_pk()`. The test passes if the
 specified column or columns are not a primary key.
 
-### `col_is_fk()` ###
+#### `col_is_fk()` ###
 
 ```sql
 SELECT col_is_fk( :schema, :table, :columns, :description );
@@ -5036,7 +4990,7 @@ simply list all of the foreign key constraint columns, like so:
     #        {thingy_id}
     #        {surname,given_name}
 
-### `col_isnt_fk()` ###
+#### `col_isnt_fk()` ###
 
 ```sql
 SELECT col_isnt_fk( :schema, :table, :columns, :description );
@@ -5067,7 +5021,7 @@ SELECT col_isnt_fk( :table, :column );
 This function is the inverse of `col_is_fk()`. The test passes if the
 specified column or columns are not a foreign key.
 
-### `fk_ok()` ###
+#### `fk_ok()` ###
 
 ```sql
 SELECT fk_ok( :fk_schema, :fk_table,   :fk_columns, :pk_schema,  :pk_table, :pk_columns, :description );
@@ -5160,7 +5114,7 @@ Will produce something like this:
     #         have: contacts(person_id) REFERENCES persons(id)"
     #         want: contacts(person_nick) REFERENCES persons(nick)"
 
-### `has_unique()` ###
+#### `has_unique()` ###
 
 ```sql
 SELECT has_unique( :schema, :table, :description );
@@ -5187,7 +5141,7 @@ path. If the test description is omitted, it will be set to "Table `:table`
 should have a unique constraint". Note that this test will fail if the table
 in question does not exist.
 
-### `hasnt_unique()` ###
+#### `hasnt_unique()` ###
 
 ```sql
 SELECT hasnt_unique( :schema, :table, :description );
@@ -5210,7 +5164,7 @@ SELECT hasnt_unique( :table );
 This function is the inverse of `has_unique()`. The test passes if the
 specified unique constraint does *not* exist.
 
-### `col_is_unique()` ###
+#### `col_is_unique()` ###
 
 ```sql
 SELECT col_is_unique( schema, table, columns, description );
@@ -5267,7 +5221,7 @@ were actually found, if any:
                   {first_name,last_name}
             want: {email}
 
-### `has_check()` ###
+#### `has_check()` ###
 
 ```sql
 SELECT has_check( :schema, :table, :description );
@@ -5301,7 +5255,7 @@ that do have check constraints, if any:
             have: {username}
             want: {email}
 
-### `hasnt_check()` ###
+#### `hasnt_check()` ###
 
 ```sql
 SELECT hasnt_check( :schema, :table, :description );
@@ -5324,7 +5278,7 @@ SELECT hasnt_check( :table );
 This function is the inverse of `has_check()`. The test passes if the
 specified check constraint does *not* exist.
 
-### `col_has_check()` ###
+#### `col_has_check()` ###
 
 ```sql
 SELECT col_has_check( :schema, :table, :columns, :description );
@@ -5355,7 +5309,7 @@ SELECT col_has_check( :table, :column );
 Just like `col_is_pk()`, except that it test that the column or array of
 columns have a check constraint on them.
 
-### `index_is_unique()` ###
+#### `index_is_unique()` ###
 
 ```sql
 SELECT index_is_unique( :schema, :table, :index, :description );
@@ -5380,7 +5334,7 @@ SELECT index_is_unique( :index );
 
 Tests whether an index is unique.
 
-### `index_is_primary()` ###
+#### `index_is_primary()` ###
 
 ```sql
 SELECT index_is_primary( :schema, :table, :index, :description );
@@ -5405,7 +5359,7 @@ SELECT index_is_primary( :index );
 
 Tests whether an index is on a primary key.
 
-### `index_is_partial()` ###
+#### `index_is_partial()` ###
 
 ```sql
 SELECT index_is_partial( :schema, :table, :index, :description );
@@ -5430,7 +5384,7 @@ SELECT index_is_partial( :index );
 
 Tests than an index is a partial index.
 
-### `is_partitioned()` ###
+#### `is_partitioned()` ###
 
 ```sql
 SELECT is_partitioned( :schema, :table, :description );
@@ -5457,7 +5411,7 @@ description is omitted, it will be set to "Table `:table` should be
 partitioned". Note that this test will fail if the table in question does not
 exist.
 
-### `isnt_partitioned()` ###
+#### `isnt_partitioned()` ###
 
 ```sql
 SELECT isnt_partitioned( :schema, :table, :description );
@@ -5480,7 +5434,7 @@ SELECT isnt_partitioned( :table );
 This function is the inverse of `is_partitioned()`. The test passes if the
 specified table is *not* partitioned, or if it does not exist.
 
-### `is_partition_of()` ###
+#### `is_partition_of()` ###
 
 ```sql
 SELECT is_parent( :child_schema, :child, :parent_schema, :parent_table, :description );
@@ -5513,7 +5467,7 @@ test description is omitted, it will be set to "Table `:child_table` should be
 a partition of `:parent_table`". Note that this test will fail if either table
 does not exist.
 
-### `is_clustered()` ###
+#### `is_clustered()` ###
 
 ```sql
 SELECT is_clustered( :schema, :table, :index, :description );
@@ -5541,7 +5495,7 @@ an index when the SQL command `CLUSTER TABLE INDEXNAME` has been executed.
 Clustering reorganizes the table tuples so that they are stored on disk in the
 order defined by the index.
 
-### `is_indexed()` ###
+#### `is_indexed()` ###
 
 ```sql
 SELECT is_indexed( :schema, :table, :columns, :description );
@@ -5587,7 +5541,7 @@ SELECT is_indexed( 'widgets', '"Name"' );
 This caveat applies only to column names, not to table and schema names,
 which should omit double-quoting.
 
-### `index_is_type()` ###
+#### `index_is_type()` ###
 
 ```sql
 SELECT index_is_type( :schema, :table, :index, :type, :description );
@@ -5628,47 +5582,36 @@ type, like so:
     #         have: btree
     #         want: hash
 
-## Feeling Funky
-
-Perhaps more important than testing the database schema is testing your custom
-functions. Especially if you write functions that provide the interface for
-clients to interact with the database, making sure that they work will save you
-time in the long run. So use these assertions to save yourself heartache in the
-future.
+## CUSTOM functions
 
 ### `can()` ###
 
 ```sql
-SELECT can( :schema, :functions, :description );
-SELECT can( :schema, :functions );
-SELECT can( :functions, :description );
-SELECT can( :functions );
+SELECT can( :schemaInWhichFindFunctions, :arrayFunctionsOrProcedureNames, :description );
+SELECT can( :schemaInWhichFindFunctions, :arrayFunctionsOrProcedureNames );
+SELECT can( :arrayFunctionsOrProcedureNames, :description );
+SELECT can( :arrayFunctionsOrProcedureNames );
 ```
 
 **Parameters**
 
-`:schema`
-: Schema in which to find the functions.
-
-`:functions`
-: Array of function and/or procedure names.
-
-`:description`
-: A short description of the test.
-
-Checks to be sure that `:schema` has `:functions` defined. This is subtly
-different from `functions_are()`. `functions_are()` fails if the functions
+* This is subtly
+different from `functions_are()`
+* `functions_are()` fails if the functions
 defined in `:schema` are not exactly the functions defined in `:functions`.
 `can()`, on the other hand, just makes sure that `:functions` exist.
 
 If `:schema` is omitted, then `can()` will look for functions defined in
-schemas defined in the search path. No matter how many functions are listed in
-`:functions`, a single call to `can()` counts as one test. If you want
+schemas defined in the search path
+* No matter how many functions are listed in
+`:functions`, a single call to `can()` counts as one test
+* If you want
 otherwise, call `can()` once for each function --- or better yet, use
-`has_function()`. Example:
+`has_function()`
+* Example:
 
 ```sql
-SELECT can( 'pg_catalog', ARRAY['upper', 'lower'] );
+
 ```
 
 If any of the functions are not defined, the test will fail and the

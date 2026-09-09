@@ -10,3 +10,11 @@ SELECT tables_are(
                'myschema',
                ARRAY[ 'users', 'widgets', 'gadgets', 'session' ]
 );
+
+-- TODO:
+
+-- X. functions_are()
+SELECT functions_are(
+               'myschema',
+               ARRAY[ 'foo', 'bar', 'frobnitz' ]
+);
