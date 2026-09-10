@@ -2175,12 +2175,14 @@ SELECT functions_are( :arrayOfFunctionsOrProcedureNames, :description );
 SELECT functions_are( :arrayOfFunctionsOrProcedureNames );
 ```
 
-* TODO: This function tests that all of the functions or procedures in the named schema,
-or that are visible in the search path, are only the functions that *should* be
-there
-* If the `:schema` argument is omitted, functions will be sought in the
-search path, excluding `pg_catalog` and `information_schema` If the description
-is omitted, a generally useful default description will be generated
+* ALL `arrayOfFunctionsOrProcedureNames` 
+  * TODO: named schema,
+  or that are visible in the search path, are only the functions that *should* be
+  there
+* if `:schemaInWhichFindFunctions` argument is omitted -> functions are found | search path
+  * EXCEPT TO
+    * `pg_catalog`
+    * `information_schema`
 
 #### `roles_are()` ###
 
@@ -6371,29 +6373,20 @@ a useful diagnostic:
 
 ## Database Deets
 
-Tables and functions aren't the only objects in the database, as you well
-know. These assertions close the gap by letting you test the attributes of
-other database objects.
-
 ### `language_is_trusted()` ###
 
 ```sql
-SELECT language_is_trusted( language, description );
-SELECT language_is_trusted( language );
+SELECT language_is_trusted( proceduralLanguageName, description );
+SELECT language_is_trusted( proceduralLanguageName );
 ```
 
 **Parameters**
 
-`:language`
-: Name of a procedural language.
-
-`:description`
-: A short description of the test.
-
-Tests that the specified procedural language is trusted. See the [CREATE
-LANGUAGE](https://www.postgresql.org/docs/current/static/sql-createlanguage.html
+* Tests that the specified procedural language is trusted
+* See the [CREATE LANGUAGE](https://www.postgresql.org/docs/current/static/sql-createlanguage.html
 "CREATE LANGUAGE") documentation for details on trusted and untrusted
-procedural languages. If the `:description` argument is not passed, a suitably
+procedural languages
+* If the `:description` argument is not passed, a suitably
 useful default will be created.
 
 In the event that the language in question does not exist in the database,
@@ -6431,11 +6424,13 @@ SELECT enum_has_labels( :enum, :labels );
 
 This function tests that an enum consists of an expected list of labels.The
 first argument is a schema name, the second an enum name, the third an array of
-enum labels, and the fourth a description. Example:
+enum labels, and the fourth a description
+* Example:
 
     SELECT enum_has_labels( 'myschema', 'someenum', ARRAY['foo', 'bar'] );
 
-If you omit the schema, the enum must be visible in the search path. If you
+If you omit the schema, the enum must be visible in the search path
+* If you
 omit the test description, it will be set to "Enum `:enum` should have labels
 (`:labels`)".
 
@@ -6822,49 +6817,14 @@ If the rule in question does not exist, you'll be told that, too:
 
 But then you run `has_rule()` first, don't you?
 
-## Who owns me?
-
-After testing the availability of several objects, we often need to know who
-owns an object.
+## owners' object?
 
 ### `db_owner_is ()` ###
 
 ```sql
-SELECT db_owner_is ( :dbname, :user, :description );
-SELECT db_owner_is ( :dbname, :user );
+SELECT db_owner_is ( :dbname, :userName, :description );
+SELECT db_owner_is ( :dbname, :userName );
 ```
-
-**Parameters**
-
-`:dbname`
-: Name of a database.
-
-`:user`
-: Name of a user.
-
-`:description`
-: A short description of the test.
-
-Tests the ownership of the database. If the `:description` argument is
-omitted, an appropriate description will be created. Examples:
-
-```sql
-SELECT db_owner_is( 'mydb', 'someuser', 'mydb should be owned by someuser' );
-SELECT db_owner_is( current_database(), current_user );
-```
-
-In the event that the test fails because the database in question does not
-actually exist, you will see an appropriate diagnostic such as:
-
-    # Failed test 16: "Database foo should be owned by www"
-    #     Database foo does not exist
-
-If the test fails because the database is not owned by the specified user, the
-diagnostics will look something like:
-
-    # Failed test 17: "Database bar should be owned by root"
-    #         have: postgres
-    #         want: root
 
 ### `schema_owner_is ()` ###
 
@@ -7521,22 +7481,16 @@ user, the diagnostics will look something like:
     #         have: postgres
     #         want: root
 
-## Privileged Access
-
-So we know who owns the objects. But what about other roles? Can they access
-database objects? Let's find out!
+## Privilege Access
 
 ### `database_privs_are()`
 
 ```sql
-SELECT database_privs_are ( :db, :role, :privileges, :description );
-SELECT database_privs_are ( :db, :role, :privileges );
+SELECT database_privs_are ( :databaseName, :role, :privileges, :description );
+SELECT database_privs_are ( :databaseName, :role, :privileges );
 ```
 
 **Parameters**
-
-`:db`
-: Name of a database.
 
 `:role`
 : Name of a user or group role.
@@ -7558,11 +7512,7 @@ If the `:description` argument is omitted, an appropriate description will be
 created. Examples:
 
 ```sql
-SELECT database_privs_are(
-    'flipr', 'fred', ARRAY['CONNECT', 'TEMPORARY'],
-    'Fred should be granted CONNECT and TEMPORARY on db "flipr"'
-);
-SELECT database_privs_are( 'dept_corrections', ARRAY['CREATE'] );
+
 ```
 
 If the role is granted permissions other than those specified, the diagnostics
@@ -8453,165 +8403,81 @@ missing policy command, like so:
     #         have: INSERT
     #         want: ALL
 
-# No Test for the Wicked
-
-There is more to pgTAP. Oh *so* much more! You can output your own
-[diagnostics](#Diagnostics). You can write [conditional
-tests](#Conditional+Tests) based on the output of [utility
-functions](#Utility+Functions). You can [batch up tests in
-functions](#Tap+That+Batch). Read on to learn all about it.
+# utility functions
 
 ## Diagnostics
 
-If you pick the right test function, you'll usually get a good idea of what
-went wrong when it failed. But sometimes it doesn't work out that way. So here
-we have ways for you to write your own diagnostic messages which are safer
-than just `\echo` or `SELECT foo`.
+* allows
+  * writing your OWN diagnostic messages
+
+* vs `\echo` OR `SELECT foo`
+  * safer 
 
 ### `diag()` ###
 
 ```sql
-SELECT diag( :lines );
+SELECT diag( :listOfOneOrMoreSQLValuesWhichSameType );
 ```
 
-**Parameters**
+* `listOfOneOrMoreSQLValuesWhichSameType`
+  * ALLOWED ANY type / 
+    * will be converted -- to -- text
+  * if you pass >1 -> they are concatenated
 
-`:lines`
-: A list of one or more SQL values of the same type.
-
-Returns a diagnostic message which is guaranteed not to interfere with test
-output. Handy for this sort of thing:
-
-```sql
--- Output a diagnostic message if the collation is not en_US.UTF-8.
-SELECT diag(
- E'These tests expect LC_COLLATE to be en_US.UTF-8,\n',
- 'but yours is set to ', setting, E'.\n',
- 'As a result, some tests may fail. YMMV.'
-)
-  FROM pg_settings
- WHERE name = 'lc_collate'
-   AND setting <> 'en_US.UTF-8';
-```
-
-Which would produce:
-
-    # These tests expect LC_COLLATE to be en_US.UTF-8,
-    # but yours is set to en_US.ISO8859-1.
-    # As a result, some tests may fail. YMMV.
-
-You can pass data of any type to `diag()` and it will all be converted to text
-for the diagnostics. You can also pass any number of arguments (as long as they
-are all the same data type) and they will be concatenated together.
+* 's return
+  * diagnostic message / ❌NOT interfere with test output❌
 
 ## Conditional Tests
 
-Sometimes running a test under certain conditions will cause the test script
-or function to die. A certain function or feature isn't implemented (such as
-`sha256()` prior to PostgreSQL 11), some resource isn't available (like a
-procedural language), or a contrib module isn't available. In these cases it's
-necessary to skip tests, or declare that they are supposed to fail but will
-work in the future (a todo test).
+* use cases
+  * function OR feature / is NOT implemented
+  * resource / is NOT AVAILABLE
+  * contrib module / is NOT AVAILABLE
 
 ### `skip()` ###
 
 ```sql
-SELECT skip( :why, :how_many );
-SELECT skip( :how_many, :why );
-SELECT skip( :why );
-SELECT skip( :how_many );
+SELECT skip( :whyToSkipTheTests, :how_manySkipsToTest );
+SELECT skip( :how_manySkipsToTest, :whyToSkipTheTests );
+SELECT skip( :whyToSkipTheTests );
+SELECT skip( :how_manySkipsToTest );
 ```
 
-**Parameters**
+* 's return
+  * SKIP test results
 
-`:why`
-: Reason for skipping the tests.
+* use cases
+  * | `SELECT` statement,
+    * replacing the test's output
+      * Reason:🧠OTHERWISE would have run🧠
+  * | `SELECT .. FROM <TABLE_NAME>`
+    * 1 skip / table's row
 
-`:how_many`
-: Number of tests to skip
-
-Outputs SKIP test results. Use it in a conditional expression within a
-`SELECT` statement to replace the output of a test that you otherwise would
-have run.
-
-```sql
-SELECT CASE WHEN pg_version_num() < 80300
-    THEN skip('has_enum() not supported before 8.3', 2 )
-    ELSE collect_tap(
-        has_enum( 'bug_status' ),
-        has_enum( 'bug_status', 'mydesc' )
-    ) END;
-```
-
-Note how use of the conditional `CASE` statement has been used to determine
-whether or not to run a couple of tests. If they are to be run, they are run
-through `collect_tap()`, so that we can run a few tests in the same query. If
-we don't want to run them, we call `skip()` and tell it how many tests we're
-skipping.
-
-If you don't specify how many tests to skip, `skip()` will assume that you're
-skipping only one. This is useful for the simple case, of course:
-
-```sql
-SELECT CASE current_schema()
-    WHEN 'public' THEN is( :this, :that )
-    ELSE skip( 'Tests not running in the "public" schema' )
-    END;
-```
-
-But you can also use it in a `SELECT` statement that would otherwise return
-multiple rows:
-
-```sql
-SELECT CASE current_schema()
-    WHEN 'public' THEN is( nspname, 'public' )
-    ELSE skip( 'Cannot see the public schema' )
-    END
-  FROM pg_namespace;
-```
-
-This will cause it to skip the same number of rows as would have been tested
-had the `WHEN` condition been true.
+* `how_manySkipsToTest`
+  * if you do NOT specify it -> skip 1! test
 
 ### `todo()` ###
 
 ```sql
-SELECT todo( :why, :how_many );
-SELECT todo( :how_many, :why );
-SELECT todo( :why );
-SELECT todo( :how_many );
+SELECT todo( :whyToDo, :how_manyToDo );
+SELECT todo( :how_manyToDo, :whyToDo );
+SELECT todo( :whyToDo );
+SELECT todo( :how_manyToDo );
 ```
 
-**Parameters**
+* use cases
+  * bug NOT YET fixed
+  * feature NOT YET fixed
 
-`:why`
-: Reason for marking tests as to dos.
+* `how_manyToDo`
+  * if it's omitted -> defaults 1
 
-`:how_many`
-: Number of tests to mark as to dos.
+* right behavior
+  * `todo()` test fails
+    * ❌ALTHOUGH it's NOT counted as failure ❌
 
-Declares a series of tests that you expect to fail and why. Perhaps it's
-because you haven't fixed a bug or haven't finished a new feature:
-
-```sql
-SELECT todo('URIGeller not finished', 2);
-
-\set card '\'Eight of clubs\''
-SELECT is( URIGeller.yourCard(), :card, 'Is THIS your card?' );
-SELECT is( URIGeller.bendSpoon(), 'bent', 'Spoon bending, how original' );
-```
-
-With `todo()`, `:how_many` specifies how many tests are expected to fail. If
-`:how_many` is omitted, it defaults to 1. pgTAP will run the tests normally,
-but print out special flags indicating they are "todo" tests. The test harness
-will interpret these failures as ok. Should any todo test pass, the harness
-will report it as an unexpected success. You then know that the thing you had
-todo is done and can remove the call to `todo()`.
-
-The nice part about todo tests, as opposed to simply commenting out a block of
-tests, is that they're like a programmatic todo list. You know how much work
-is left to be done, you're aware of what bugs there are, and you'll know
-immediately when they're fixed.
+* wrong behavior
+  * `todo()` test pass
 
 ### `todo_start( why )` ###
 ### `todo_start( )` ###
@@ -8620,8 +8486,10 @@ This function allows you declare all subsequent tests as TODO tests, up until
 the `todo_end()` function is called.
 
 The `todo()` syntax is generally pretty good about figuring out whether or not
-we're in a TODO test. However, often we find it difficult to specify the
-*number* of tests that are TODO tests. Thus, you can instead use
+we're in a TODO test
+* However, often we find it difficult to specify the
+*number* of tests that are TODO tests
+* Thus, you can instead use
 `todo_start()` and `todo_end()` to more easily define the scope of your TODO
 tests.
 
@@ -8745,13 +8613,9 @@ depending on how good the pgTAP build process gets at detecting a OS.
 ### `collect_tap()` ###
 
 ```sql
-SELECT collect_tap(:lines);
+SELECT collect_tap(:linesOfTAP);
 ```
 
-**Parameters**
-
-`:lines`
-: A list of one or more lines of TAP.
 
 Collects the results of one or more pgTAP tests and returns them all. Useful
 when used in combination with `skip()`:
@@ -8856,7 +8720,7 @@ SELECT findfuncs('tests', '^test);
 (1 row)
 ```
 
-## Tap that Batch
+## batch up tests functions
 
 Sometimes it can be useful to batch a lot of TAP tests into a function. The
 simplest way to do so is to define a function that `RETURNS SETOF TEXT` and
